@@ -3,7 +3,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 const axiosInstance = axios.create({
-  baseURL: "https://devapi.happybd.org/api/v1", // Replace with your backend URL
+  baseURL: "https://api.happybd.org/api/v1", // Replace with your backend URL
   headers: {
     "Content-Type": "application/json",
   },
