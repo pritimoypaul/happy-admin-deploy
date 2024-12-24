@@ -29,15 +29,14 @@ import { DialogClose } from "@/components/ui/dialog";
 import { useState } from "react";
 import Image from "next/image";
 import axiosInstance from "@/utils/axios";
+import { Loader2 } from "lucide-react";
 
 const FormSchema = z.object({
   image: z.instanceof(File, { message: "Profile picture is required" }),
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
-  nid: z.string().min(2, {
-    message: "Please provide a valid Id number",
-  }),
+  nid: z.string().optional(),
   phone: z.string().min(2, {
     message: "Please provide a valid phone number",
   }),
@@ -299,11 +298,14 @@ export function AddFreelancerForm({ refetch }: any) {
 
             <div className="flex justify-end gap-2">
               <DialogClose asChild>
-                <Button disabled={loading} variant={"outlinered"} type="button">
+                <Button variant={"outlinered"} type="button">
                   Cancel
                 </Button>
               </DialogClose>
-              <Button type="submit">Submit</Button>
+              <Button disabled={loading} type="submit">
+                {loading && <Loader2 className="animate-spin" />}
+                Submit
+              </Button>
             </div>
           </form>
         </Form>
