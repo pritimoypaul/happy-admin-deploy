@@ -2,15 +2,14 @@
 import CustomCard from "@/components/core/customCard";
 import useWindowDimensions from "@/utils/windowSize";
 import Image from "next/image";
-import React, { useState } from "react";
-import { Calendar as CalendarIcon } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
+import moment from "moment";
 
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -18,7 +17,6 @@ import {
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -47,78 +45,47 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import clsx from "clsx";
-import { Progress } from "@/components/ui/progress";
+// import { Progress } from "@/components/ui/progress";
+import { useOrderList } from "@/utils/apis/getOrder";
+import { Order } from "@/types/order";
+import { useRetailerList } from "@/utils/apis/getRetailer";
+import { useAreaList } from "@/utils/apis/getArea";
 
-const Order = () => {
+const OrderScreen = () => {
   const { height } = useWindowDimensions();
 
   const [tableTab, setTableTab] = useState("all_order");
+  const [limit, setLimit] = useState(10);
+  const [selectedPage, setSelectedPage] = useState(1);
   const [date, setDate] = React.useState<DateRange | undefined>({
     from: new Date(2024, 0, 20),
     to: addDays(new Date(2024, 0, 20), 20),
   });
 
+  const { data, isFetching, isFetched, refetch } = useOrderList(
+    limit,
+    selectedPage
+  );
+
+  const { data: retailerData } = useRetailerList(limit, selectedPage);
+
+  const { data: bazarData } = useAreaList(100, 1);
+
   const mainComponentHeight = height - 300;
 
-  const topProducts = [
-    {
-      orders: "SKN1100",
-      date: "April 24, 2022",
-      retailer: "Chieko Chute",
-      amount: "৳10.62",
-      qty: "৳10.62",
-      payment: "paid",
-      status: "cancelled",
-      cancel_reason: "Reason for cancellation",
-    },
-    {
-      orders: "SKN1200",
-      date: "April 24, 2022",
-      retailer: "Chieko Chute",
-      amount: "৳10.62",
-      qty: "৳10.62",
-      payment: "paid",
-      status: "delivered",
-      delivery_percentage: "20",
-    },
-    {
-      orders: "SKN1300",
-      date: "April 24, 2022",
-      retailer: "Chieko Chute",
-      amount: "৳10.62",
-      qty: "৳10.62",
-      payment: "paid",
-      status: "on_delivery",
-    },
-    {
-      orders: "SKN1400",
-      date: "April 24, 2022",
-      retailer: "Chieko Chute",
-      amount: "৳10.62",
-      qty: "৳10.62",
-      payment: "paid",
-      status: "cancelled",
-      cancel_reason: "Reason for cancellation",
-    },
-    {
-      orders: "SKN1500",
-      date: "April 24, 2022",
-      retailer: "Chieko Chute",
-      amount: "৳10.62",
-      qty: "৳10.62",
-      payment: "paid",
-      status: "delivered",
-    },
-    {
-      orders: "SKN1600",
-      date: "April 24, 2022",
-      retailer: "Chieko Chute",
-      amount: "৳10.62",
-      qty: "৳10.62",
-      payment: "baki",
-      status: "delivered",
-    },
-  ];
+  const paginate = (side: string) => {
+    if (side === "left") {
+      if (selectedPage == 1) return;
+      setSelectedPage(selectedPage - 1);
+    } else {
+      if (selectedPage == data?.data?.meta?.totalPage) return;
+      setSelectedPage(selectedPage + 1);
+    }
+  };
+
+  useEffect(() => {
+    refetch();
+  }, [limit, selectedPage]);
 
   return (
     <div className="h-full">
@@ -126,12 +93,12 @@ const Order = () => {
       <div className="flex gap-4 items-center">
         <CustomCard
           title="Total Retailer"
-          amount="2000"
+          amount={retailerData?.data?.meta?.totalDoc ?? 0}
           icon="/images/total-order.svg"
         />
         <CustomCard
           title="Total Bazar"
-          amount="80"
+          amount={bazarData?.data?.meta?.totalDoc ?? 0}
           icon="/images/pending-order.svg"
         />
 
@@ -253,116 +220,124 @@ const Order = () => {
               paddingBottom: "200px",
             }}
           >
-            <Table>
-              <TableHeader>
-                <TableRow className="text-[#595F84]">
-                  <TableHead className="w-[300px]">Orders</TableHead>
-                  <TableHead className="w-[200px]">Date</TableHead>
-                  <TableHead>Retailer</TableHead>
-                  <TableHead className="text-center">Amount</TableHead>
-                  <TableHead className="text-right">Total QTY</TableHead>
-                  <TableHead className="text-right">Payment</TableHead>
-                  <TableHead className="text-right">Status</TableHead>
-                  <TableHead className="text-right w-[200px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {topProducts.map((product) => (
-                  <TableRow key={product.orders} className="text-[#595F84]">
-                    <TableCell className="font-medium">
-                      {product.orders}
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {product.date}
-                    </TableCell>
-                    <TableCell>
-                      <Link href="/admin/order-retailer-profile">
-                        {product.retailer}
-                      </Link>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {product.amount}
-                    </TableCell>
-                    <TableCell className="text-right">{product.qty}</TableCell>
-                    <TableCell className="text-right">
-                      <div
-                        className={clsx(
-                          `text-right w-full flex justify-end float-right`,
-                          {
-                            "text-[#0CAF60] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
-                              product.payment == "paid",
-                            "text-[#EF3DF2] bg-[#FC6BFF1A] px-[14px] py-[4px] rounded-sm max-w-fit":
-                              product.payment == "baki",
-                          }
-                        )}
-                      >
-                        {product.payment == "paid" ? "Paid" : "Baki"}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div
-                        className={clsx(
-                          `text-right w-full flex justify-end float-right`,
-                          {
-                            "text-[#0CAF60] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
-                              product.status == "delivered",
-                            "text-[#FD6A6A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
-                              product.status == "cancelled",
-                            "text-[#FE964A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
-                              product.status == "on_delivery",
-                          }
-                        )}
-                      >
-                        {product.status == "delivered"
-                          ? "Delivered"
-                          : product.status == "on_delivery"
-                          ? "On Delivery"
-                          : "Cancelled"}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {product?.cancel_reason && (
-                        <p className="text-[10px] text-[#8A94A6]">
-                          {product.cancel_reason}
-                        </p>
-                      )}
-
-                      {product?.delivery_percentage && (
-                        <div className="flex items-center gap-4">
-                          <p className="text-[10px] text-[#0CAF60]">
-                            {product?.delivery_percentage}%
-                          </p>
-                          <Progress
-                            value={Number(product?.delivery_percentage)}
-                            indicatorColor="bg-green-600"
-                            className="w-[60%] h-[5px]"
-                          />
-                        </div>
-                      )}
-                    </TableCell>
+            {isFetching ? (
+              <div className="flex justify-center items-center">
+                <Loader2 className="animate-spin" />
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow className="text-[#595F84]">
+                    <TableHead className="w-[300px]">Orders</TableHead>
+                    <TableHead className="w-[200px]">Date</TableHead>
+                    <TableHead>Retailer</TableHead>
+                    <TableHead className="text-center">Amount</TableHead>
+                    <TableHead className="text-right">Total QTY</TableHead>
+                    <TableHead className="text-right">Payment</TableHead>
+                    <TableHead className="text-right">Status</TableHead>
+                    <TableHead className="text-right w-[200px]"></TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {isFetched &&
+                    data?.data?.result?.map((order: Order) => (
+                      <TableRow key={order?._id} className="text-[#595F84]">
+                        <TableCell className="font-medium">
+                          {order?.id.slice(0, 10)}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {moment(order?.createdAt).format("LL")}
+                        </TableCell>
+                        <TableCell>
+                          <Link href="/admin/order-retailer-profile">
+                            {order?.retailer?.name}
+                          </Link>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          ৳{order?.collectedAmount}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          ৳{order?.collectionAmount}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div
+                            className={clsx(
+                              `text-right w-full flex justify-end float-right`,
+                              {
+                                "text-[#0CAF60] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                  order?.paymentStatus == "Paid",
+                                "text-[#EF3DF2] bg-[#FC6BFF1A] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                  order?.paymentStatus == "Unpaid",
+                              }
+                            )}
+                          >
+                            {order?.paymentStatus == "Paid" ? "Paid" : "Baki"}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div
+                            className={clsx(
+                              `text-right w-full flex justify-end float-right`,
+                              {
+                                "text-[#0CAF60] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                  order?.status == "Delivered",
+                                "text-[#0bb663] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                  order?.status == "Processing",
+                                "text-[#FD6A6A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                  order?.status == "Cancelled",
+                                "text-[#FE964A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                  order?.status == "On Delivery",
+                              }
+                            )}
+                          >
+                            {order?.status}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {/* {product?.cancel_reason && (
+                          <p className="text-[10px] text-[#8A94A6]">
+                            {product.cancel_reason}
+                          </p>
+                        )} */}
+
+                          {/* {product?.delivery_percentage && (
+                          <div className="flex items-center gap-4">
+                            <p className="text-[10px] text-[#0CAF60]">
+                              {product?.delivery_percentage}%
+                            </p>
+                            <Progress
+                              value={Number(product?.delivery_percentage)}
+                              indicatorColor="bg-green-600"
+                              className="w-[60%] h-[5px]"
+                            />
+                          </div>
+                        )} */}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            )}
           </div>
         </div>
         {/* footer content */}
         <div className="bg-[#fff] px-[34px] py-[18px] flex justify-between items-center border-t-[1px] border-[#0472ED1F] absolute bottom-0 w-full">
           <div className="text-[#718096] text-[14px] flex gap-2 items-center">
             Show&nbsp;Result:
-            <Select defaultValue={"1"}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="1" />
+            <Select
+              defaultValue={limit.toString()}
+              onValueChange={(value) => setLimit(Number(value))}
+            >
+              <SelectTrigger className="w-full" defaultValue={limit.toString()}>
+                <SelectValue placeholder="10" />
               </SelectTrigger>
               <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>1</SelectLabel>
-                  <SelectItem value="1">1</SelectItem>
-                  <SelectItem value="2">2</SelectItem>
-                  <SelectItem value="3">3</SelectItem>
-                  <SelectItem value="4">4</SelectItem>
-                  <SelectItem value="5">5</SelectItem>
-                </SelectGroup>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="6">6</SelectItem>
+                <SelectItem value="7">7</SelectItem>
+                <SelectItem value="8">8</SelectItem>
+                <SelectItem value="9">9</SelectItem>
+                <SelectItem value="10">10</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -370,24 +345,26 @@ const Order = () => {
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
-                  <PaginationPrevious href="#" />
+                  <PaginationPrevious
+                    href="#"
+                    onClick={() => paginate("left")}
+                  />
                 </PaginationItem>
+                {isFetched &&
+                  [...Array(data?.data?.meta?.totalPage)].map((_, index) => (
+                    <PaginationItem key={index}>
+                      <PaginationLink
+                        className="cursor-pointer"
+                        onClick={() => setSelectedPage(index + 1)}
+                        isActive={data?.data?.meta?.page == index + 1}
+                      >
+                        {index + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+
                 <PaginationItem>
-                  <PaginationLink href="#">1</PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink href="#" isActive>
-                    2
-                  </PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink href="#">3</PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationNext href="#" />
+                  <PaginationNext href="#" onClick={() => paginate("right")} />
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
@@ -398,4 +375,4 @@ const Order = () => {
   );
 };
 
-export default Order;
+export default OrderScreen;
