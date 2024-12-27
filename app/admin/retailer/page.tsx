@@ -133,7 +133,7 @@ const Retailer = () => {
                 <DialogTitle>Add New Retailer</DialogTitle>
                 <DialogDescription></DialogDescription>
               </DialogHeader>
-              <AddRetailerForm />
+              <AddRetailerForm refetchData={refetch} />
             </DialogContent>
           </Dialog>
           {/* edit dialog */}
@@ -253,7 +253,7 @@ const Retailer = () => {
                         <TableCell className="font-medium w-[300px]">
                           <div className="flex gap-2 items-center">
                             <Image
-                              src="/images/rasel.png"
+                              src={retailer?.retailer?.profileImg}
                               alt="pic"
                               height={33}
                               width={33}

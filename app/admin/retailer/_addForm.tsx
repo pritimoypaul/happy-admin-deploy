@@ -24,14 +24,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DialogClose } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useAreaList } from "@/utils/apis/getArea";
+import { useUpazilaList } from "@/utils/apis/getUpazila";
+import { useUnionList } from "@/utils/apis/getUnion";
+import { Upazila } from "@/types/upazila";
+import axiosInstance from "@/utils/axios";
+import { Loader2 } from "lucide-react";
 
 const FormSchema = z.object({
   retailer_phone: z.string().min(2, {
     message: "Please provide a valid phone number",
   }),
-  shop_image: z.instanceof(File, { message: "Profile picture is required" }),
+  // shop_image: z.instanceof(File, { message: "Profile picture is required" }),
+  nid: z.string().optional(),
   retailer_image: z.instanceof(File, {
     message: "Profile picture is required",
   }),
@@ -47,78 +54,73 @@ const FormSchema = z.object({
   union: z.string().min(2, {
     message: "Please select union",
   }),
-  bazar: z.string().min(2, {
-    message: "Please select bazar",
+  environment: z.string().min(2, {
+    message: "Please provide environment",
   }),
   area: z.string().min(2, {
     message: "Please provide an area name",
   }),
 });
 
-export function AddRetailerForm() {
-  const [shopImagePreview, setShopImagePreview] = useState<string | null>(null);
+export function AddRetailerForm({ refetchData }: any) {
+  // const [shopImagePreview, setShopImagePreview] = useState<string | null>(null);
   const [retailerImagePreview, setRetailerImagePreview] = useState<
     string | null
   >(null);
+
+  // const [areaList, setArealist] = useState<Array<Area>>([]);
+
+  const [selectedUpazila, setSelectedUpazila] = useState("");
+  const [selectedUnion, setSelectedUnion] = useState("");
+  const [selectedArea, setSelectedArea] = useState("");
   const [success, setSuccess] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
+  const [userLat, setUserLat] = useState(0.0);
+  const [userLong, setUserLong] = useState(0.0);
+
+  const { data: upazilaData, isFetched: upazilaFetched } = useUpazilaList();
+
+  const {
+    data: unionData,
+    isFetched: unionFetched,
+    refetch: unionRefetch,
+  } = useUnionList(selectedUpazila);
+
+  const {
+    data: bazarData,
+    isFetched: bazarFetched,
+    refetch: bazarRefetch,
+  } = useAreaList(100, 1, selectedUnion);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       retailer_phone: "",
-      shop_image: undefined,
+      // shop_image: undefined,
+      nid: "",
       retailer_image: undefined,
       retailer_name: "",
       shop_name: "",
       upazila: "",
       union: "",
-      bazar: "",
+      environment: "",
       area: "",
     },
   });
 
-  function onSubmit(data: any) {
-    // convert json to formData
-    const formData = new FormData();
-
-    // Append all form fields to formData
-    Object.keys(data).forEach((key) => {
-      if (key === "image" && data[key] instanceof File) {
-        formData.append(key, data[key] as File);
-      } else if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, data[key] as string);
-      }
-    });
-
-    console.log(data);
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-
-    form.reset();
-    setShopImagePreview(null);
-    setRetailerImagePreview(null);
-    setSuccess(true);
-  }
-
-  const handleShopImageChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      form.setValue("shop_image", file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setShopImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  // const handleShopImageChange = (
+  //   event: React.ChangeEvent<HTMLInputElement>
+  // ) => {
+  //   const file = event.target.files?.[0];
+  //   if (file) {
+  //     form.setValue("shop_image", file);
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setShopImagePreview(reader.result as string);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
   const handleRetailerImageChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -136,10 +138,95 @@ export function AddRetailerForm() {
 
   const restForm = () => {
     form.reset();
-    setShopImagePreview(null);
+    // setShopImagePreview(null);
     setRetailerImagePreview(null);
     setSuccess(false);
   };
+
+  async function onSubmit(data: any) {
+    // convert json to formData
+    const formData = new FormData();
+
+    // Append all form fields to formData
+    Object.keys(data).forEach((key) => {
+      if (key === "retailer_image" && data[key] instanceof File) {
+        formData.append("file", data[key] as File);
+      }
+    });
+
+    formData.append(
+      "data",
+      JSON.stringify({
+        phone: data.retailer_phone,
+        nid: data.nid,
+        name: data.retailer_name,
+        shopName: data.shop_name,
+        upazila: data.upazila,
+        union: data.union,
+        environment: data.environment,
+        area: data.area,
+        role: "retailer",
+        location: {
+          latitude: userLat,
+          longitude: userLong,
+        },
+      }) as string
+    );
+
+    for (const pair of formData.entries()) {
+      console.log(pair[0], pair[1]);
+    }
+
+    try {
+      setLoading(true);
+      await axiosInstance.post("/retailers", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      toast({
+        variant: "default",
+        title: "Retailer added successfully!",
+        description: "You have added a new Retailer.",
+      });
+      setLoading(false);
+      refetchData();
+      setSuccess(true);
+    } catch (e: any) {
+      setLoading(false);
+
+      console.log(e.response.data.message);
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: e.response.data.message,
+      });
+    }
+    setLoading(false);
+
+    form.reset();
+    setRetailerImagePreview(null);
+  }
+
+  const getUserLocation = async () => {
+    await navigator.geolocation.getCurrentPosition(function (position) {
+      setUserLat(position.coords.latitude);
+      setUserLong(position.coords.longitude);
+    });
+  };
+
+  useEffect(() => {
+    unionRefetch();
+  }, [selectedUpazila]);
+
+  useEffect(() => {
+    bazarRefetch();
+  }, [selectedUnion]);
+
+  useEffect(() => {
+    getUserLocation();
+  }, []);
 
   return (
     <>
@@ -190,7 +277,7 @@ export function AddRetailerForm() {
             <div>
               <div className="w-full flex items-start justify-around gap-3">
                 <div className="flex-1">
-                  <FormField
+                  {/* <FormField
                     control={form.control}
                     name="shop_image"
                     render={({ field }) => (
@@ -213,6 +300,23 @@ export function AddRetailerForm() {
                             width={32}
                           />
                         )}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  /> */}
+                  <FormField
+                    control={form.control}
+                    name="nid"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>NID</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="0283974894"
+                            {...field}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -300,14 +404,27 @@ export function AddRetailerForm() {
                         <FormLabel>Select Upazila</FormLabel>
                         <FormControl>
                           <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              setSelectedUpazila(value);
+                            }}
+                            defaultValue={selectedUpazila}
                           >
                             <SelectTrigger className="w-full">
                               <SelectValue placeholder="Upazila Name" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="Upazila">Upazila</SelectItem>
+                              {upazilaFetched &&
+                                upazilaData?.data.result.map(
+                                  (upazila: Upazila) => (
+                                    <SelectItem
+                                      key={upazila._id}
+                                      value={upazila._id}
+                                    >
+                                      {upazila.bnName}
+                                    </SelectItem>
+                                  )
+                                )}
                             </SelectContent>
                           </Select>
                         </FormControl>
@@ -325,14 +442,22 @@ export function AddRetailerForm() {
                         <FormLabel>Select Union</FormLabel>
                         <FormControl>
                           <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              setSelectedUnion(value);
+                            }}
+                            defaultValue={selectedUnion}
                           >
                             <SelectTrigger className="w-full">
                               <SelectValue placeholder="Union Name" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="Union">Union</SelectItem>
+                              {unionFetched &&
+                                unionData?.data.result.map((union: any) => (
+                                  <SelectItem key={union._id} value={union._id}>
+                                    {union.bnName}
+                                  </SelectItem>
+                                ))}
                             </SelectContent>
                           </Select>
                         </FormControl>
@@ -348,20 +473,28 @@ export function AddRetailerForm() {
                 <div className="flex-1">
                   <FormField
                     control={form.control}
-                    name="bazar"
+                    name="area"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Select Bazar</FormLabel>
+                        <FormLabel>Select Area</FormLabel>
                         <FormControl>
                           <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              setSelectedArea(value);
+                            }}
+                            defaultValue={selectedArea}
                           >
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Bazar Name" />
+                              <SelectValue placeholder="Area Name" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="Bazar">Bazar</SelectItem>
+                              {bazarFetched &&
+                                bazarData?.data?.result?.map((bazar: any) => (
+                                  <SelectItem key={bazar._id} value={bazar._id}>
+                                    {bazar.bnName}
+                                  </SelectItem>
+                                ))}
                             </SelectContent>
                           </Select>
                         </FormControl>
@@ -373,14 +506,14 @@ export function AddRetailerForm() {
                 <div className="flex-1">
                   <FormField
                     control={form.control}
-                    name="area"
+                    name="environment"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Area Name</FormLabel>
+                        <FormLabel>Environment</FormLabel>
                         <FormControl>
                           <Input
                             type="text"
-                            placeholder="Area name"
+                            placeholder="Environment name"
                             {...field}
                           />
                         </FormControl>
@@ -398,7 +531,10 @@ export function AddRetailerForm() {
                   Cancel
                 </Button>
               </DialogClose>
-              <Button type="submit">Add Retailer</Button>
+              <Button disabled={loading} type="submit">
+                {loading && <Loader2 className="animate-spin" />}
+                Add Retailer
+              </Button>
             </div>
           </form>
         </Form>
