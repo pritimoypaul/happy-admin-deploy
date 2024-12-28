@@ -58,6 +58,7 @@ const Retailer = () => {
   const [selectedUpazila, setSelectedUpazila] = useState("");
   const [selectedUnion, setSelectedUnion] = useState("");
   const [selectedArea, setSelectedArea] = useState("");
+  const [editData, setEditData] = useState({});
 
   const { data, isFetching, isFetched, refetch } = useRetailerList(
     limit,
@@ -143,7 +144,7 @@ const Retailer = () => {
                 <DialogTitle>Edit Retailer</DialogTitle>
                 <DialogDescription></DialogDescription>
               </DialogHeader>
-              <EditRetailerForm />
+              <EditRetailerForm editData={editData} refetchData={refetch} />
             </DialogContent>
           </Dialog>
         </div>
@@ -271,7 +272,12 @@ const Retailer = () => {
 
                         <TableCell className="text-center">
                           <div className="w-full flex justify-center items-center gap-2">
-                            <button onClick={() => setOpenEdit(true)}>
+                            <button
+                              onClick={() => {
+                                setEditData(retailer);
+                                setOpenEdit(true);
+                              }}
+                            >
                               <Image
                                 src="/icons/edit-icon.svg"
                                 alt="icn"

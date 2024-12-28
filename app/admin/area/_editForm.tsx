@@ -23,48 +23,100 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DialogClose } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import { useUpazilaList } from "@/utils/apis/getUpazila";
+import { useUnionList } from "@/utils/apis/getUnion";
+import { Upazila } from "@/types/upazila";
+import axiosInstance from "@/utils/axios";
+import { Loader2 } from "lucide-react";
 
 const FormSchema = z.object({
+  upazila: z.string().min(2, {
+    message: "Please select upazila",
+  }),
   union: z.string().min(2, {
     message: "Please select union",
   }),
-  bazar: z.string().min(2, {
-    message: "Please select bazar",
+  name: z.string().min(2, {
+    message: "Please set bazar name",
+  }),
+  bnName: z.string().min(2, {
+    message: "Please set bazar name in Bengali",
   }),
 });
 
-export function EditBazarForm() {
+export function EditBazarForm({ refetch, editData }: any) {
   const [success, setSuccess] = useState<boolean>(false);
+  const [selectedUpazila, setSelectedUpazila] = useState(
+    editData?.union?.upazila
+  );
+  const [selectedUnion, setSelectedUnion] = useState(editData?.union?._id);
+  const [loading, setLoading] = useState(false);
+
+  const { data: upazilaData, isFetched: upazilaFetched } = useUpazilaList();
+
+  const {
+    data: unionData,
+    isFetched: unionFetched,
+    refetch: unionRefetch,
+  } = useUnionList(selectedUpazila);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      union: "",
-      bazar: "",
+      upazila: editData?.union?.upazila,
+      union: editData?.union?._id,
+      name: editData?.name,
+      bnName: editData?.bnName,
     },
   });
 
-  function onSubmit(data: any) {
-    console.log(data);
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
+  async function onSubmit(data: any) {
+    const bazarData = {
+      name: data.name,
+      bnName: data.bnName,
+      union: data.union,
+    };
+
+    console.log(bazarData);
+
+    try {
+      setLoading(true);
+      await axiosInstance.patch(`/area/${editData?.id}/update`, bazarData);
+
+      toast({
+        variant: "default",
+        title: "Bazar edited successfully!",
+        description: "You have edited a new Bazar.",
+      });
+      setLoading(false);
+      refetch();
+    } catch (e: any) {
+      setLoading(false);
+
+      console.log(e.response.data.message);
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: e.response.data.message,
+      });
+    }
+    setLoading(false);
 
     form.reset();
     setSuccess(true);
   }
 
-  const restForm = () => {
-    form.reset();
-    setSuccess(false);
-  };
+  // const restForm = () => {
+  //   form.reset();
+  //   setSuccess(false);
+  // };
+
+  useEffect(() => {
+    unionRefetch();
+  }, [selectedUpazila]);
 
   return (
     <>
@@ -81,10 +133,9 @@ export function EditBazarForm() {
             Congratulations
           </p>
           <p className="text-[#8A94A6] text-[14px]">
-            Bazar successfully created.
+            Bazar successfully edited.
           </p>
           <br />
-          <Button onClick={() => restForm()}>Add New Bazar</Button>
         </div>
       ) : (
         <Form {...form}>
@@ -94,22 +145,33 @@ export function EditBazarForm() {
                 <div className="flex-1">
                   <FormField
                     control={form.control}
-                    name="union"
+                    name="upazila"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Select Union</FormLabel>
+                        <FormLabel>Select Upazila</FormLabel>
                         <FormControl>
                           <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
+                            defaultValue={selectedUpazila}
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              setSelectedUpazila(value);
+                            }}
                           >
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select Union" />
+                              <SelectValue placeholder="Select Upazila" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="মোহাম্মাদপুর">
-                                মোহাম্মাদপুর
-                              </SelectItem>
+                              {upazilaFetched &&
+                                upazilaData?.data.result.map(
+                                  (upazila: Upazila) => (
+                                    <SelectItem
+                                      key={upazila._id}
+                                      value={upazila._id}
+                                    >
+                                      {upazila.bnName}
+                                    </SelectItem>
+                                  )
+                                )}
                             </SelectContent>
                           </Select>
                         </FormControl>
@@ -124,24 +186,74 @@ export function EditBazarForm() {
                 <div className="flex-1">
                   <FormField
                     control={form.control}
-                    name="bazar"
+                    name="union"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Select Bazar</FormLabel>
+                        <FormLabel>Select Union</FormLabel>
                         <FormControl>
                           <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
+                            defaultValue={selectedUnion}
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              setSelectedUnion(value);
+                            }}
                           >
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select Bazar" />
+                              <SelectValue placeholder="Select Union" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="বাংলা বাজার">
-                                বাংলা বাজার
-                              </SelectItem>
+                              {unionFetched &&
+                                unionData?.data.result.map((union: any) => (
+                                  <SelectItem key={union._id} value={union._id}>
+                                    {union.bnName}
+                                  </SelectItem>
+                                ))}
                             </SelectContent>
                           </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              <br />
+              <div className="w-full flex items-start justify-around gap-3">
+                <div className="flex-1">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bazar Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="text"
+                            placeholder="Bazar Name"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              <br />
+              <div className="w-full flex items-start justify-around gap-3">
+                <div className="flex-1">
+                  <FormField
+                    control={form.control}
+                    name="bnName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bazar Name Bengali</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="text"
+                            placeholder="Bazar Name Bengali"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -157,7 +269,10 @@ export function EditBazarForm() {
                   Cancel
                 </Button>
               </DialogClose>
-              <Button type="submit">Add</Button>
+              <Button disabled={loading} type="submit">
+                {loading && <Loader2 className="animate-spin" />}
+                Update
+              </Button>
             </div>
           </form>
         </Form>

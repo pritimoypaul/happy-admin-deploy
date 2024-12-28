@@ -58,6 +58,7 @@ const AreaScreen = () => {
   const [selectedPage, setSelectedPage] = useState(1);
   const [selectedUpazila, setSelectedUpazila] = useState("");
   const [selectedUnion, setSelectedUnion] = useState("");
+  const [editData, setEditData] = useState({});
 
   const { data, isFetching, isFetched, refetch } = useAreaList(
     limit,
@@ -148,7 +149,7 @@ const AreaScreen = () => {
                 <DialogTitle>Edit Bazar</DialogTitle>
                 <DialogDescription></DialogDescription>
               </DialogHeader>
-              <EditBazarForm />
+              <EditBazarForm editData={editData} refetch={refetch} />
             </DialogContent>
           </Dialog>
         </div>
@@ -261,7 +262,12 @@ const AreaScreen = () => {
 
                         <TableCell className="text-center">
                           <div className="w-full flex justify-center items-center gap-2">
-                            <button onClick={() => setOpenEdit(true)}>
+                            <button
+                              onClick={() => {
+                                setEditData(area);
+                                setOpenEdit(true);
+                              }}
+                            >
                               <Image
                                 src="/icons/edit-icon.svg"
                                 alt="icn"
