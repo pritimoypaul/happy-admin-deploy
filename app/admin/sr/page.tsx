@@ -14,12 +14,19 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { AddSrForm } from "./_addForm";
+import { useSrList } from "@/utils/apis/getSr";
+import { Sr } from "@/types/sr";
 
-const Sr = () => {
+const SrPage = () => {
   const { height } = useWindowDimensions();
   const [viewFormat, setViewFormat] = useState<string>("gridview");
 
   const mainComponentHeight = height - 300;
+
+  const [limit] = useState(10);
+  const [selectedPage] = useState(1);
+
+  const { data, isFetched, refetch } = useSrList(limit, selectedPage);
 
   return (
     <div className="h-full">
@@ -50,7 +57,7 @@ const Sr = () => {
                 <DialogTitle></DialogTitle>
                 <DialogDescription></DialogDescription>
               </DialogHeader>
-              <AddSrForm />
+              <AddSrForm refetch={refetch} />
             </DialogContent>
           </Dialog>
         </div>
@@ -118,70 +125,20 @@ const Sr = () => {
           className="overflow-scroll px-[24px] pt-[24px] grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4"
           style={{ height: `${mainComponentHeight}px`, paddingBottom: "200px" }}
         >
-          <ProfileCard
-            name="রমজান আলী"
-            details="Pran Food & Bavreage"
-            image="/images/man.png"
-            url="/admin/sr-profile"
-          />
-          <ProfileCard
-            name="রমজান আলী"
-            details="Pran Food & Bavreage"
-            image="/images/man.png"
-            url="/admin/sr-profile"
-          />
-          <ProfileCard
-            name="রমজান আলী"
-            details="Pran Food & Bavreage"
-            image="/images/man.png"
-            url="/admin/sr-profile"
-          />
-          <ProfileCard
-            name="রমজান আলী"
-            details="Pran Food & Bavreage"
-            image="/images/man.png"
-            url="/admin/sr-profile"
-          />
-          <ProfileCard
-            name="রমজান আলী"
-            details="Pran Food & Bavreage"
-            image="/images/man.png"
-            url="/admin/sr-profile"
-          />
-          <ProfileCard
-            name="রমজান আলী"
-            details="Pran Food & Bavreage"
-            image="/images/man.png"
-            url="/admin/sr-profile"
-          />
-          <ProfileCard
-            name="রমজান আলী"
-            details="Pran Food & Bavreage"
-            image="/images/man.png"
-            url="/admin/sr-profile"
-          />
-          <ProfileCard
-            name="রমজান আলী"
-            details="Pran Food & Bavreage"
-            image="/images/man.png"
-            url="/admin/sr-profile"
-          />
-          <ProfileCard
-            name="রমজান আলী"
-            details="Pran Food & Bavreage"
-            image="/images/man.png"
-            url="/admin/sr-profile"
-          />
-          <ProfileCard
-            name="রমজান আলী"
-            details="Pran Food & Bavreage"
-            image="/images/man.png"
-            url="/admin/sr-profile"
-          />
+          {isFetched &&
+            data?.data?.result?.map((sr: Sr) => (
+              <ProfileCard
+                key={sr._id}
+                name={sr?.sr?.name}
+                details={sr?.sr?.phone}
+                image={sr?.sr?.profileImg}
+                url="/admin/sr-profile"
+              />
+            ))}
         </div>
       </div>
     </div>
   );
 };
 
-export default Sr;
+export default SrPage;

@@ -8,6 +8,7 @@ async function getRetailer(limit: number, selectedPage: number, areaId?:string, 
     page: selectedPage,
     area: areaId,
     union: unionId,
+    sort: '-_id',
   });
   try {
     const response = await axiosInstance.get(url);

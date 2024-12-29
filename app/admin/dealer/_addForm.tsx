@@ -28,76 +28,91 @@ import {
 import { DialogClose } from "@/components/ui/dialog";
 import { useState } from "react";
 import Image from "next/image";
+import axiosInstance from "@/utils/axios";
+import { Loader2 } from "lucide-react";
 
 const FormSchema = z.object({
   image: z.instanceof(File, { message: "Profile picture is required" }),
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
-  email: z.string().min(2, {
-    message: "Please provide a valid email address",
-  }),
-  nid: z.string().min(2, {
-    message: "Please provide a valid Id number",
-  }),
-  password: z.string().min(2, {
-    message: "Password must be at least 2 characters.",
-  }),
-  company: z.string().min(2, {
-    message: "Please select company name.",
-  }),
+  nid: z.string().optional(),
   phone: z.string().min(2, {
     message: "Please provide a valid phone number",
   }),
-  dealer: z.string().min(2, {
-    message: "Please select dealer name.",
-  }),
-  password_confirm: z.string().min(2, {
-    message: "Password must be at least 2 characters.",
+  role: z.string().min(2, {
+    message: "Please select role",
   }),
 });
 
-export function AddSrForm() {
+export function AddDealerForm({ refetch }: any) {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       image: undefined,
       name: "",
-      email: "",
-      nid: "",
-      password: "",
-      company: "",
-      dealer: "",
       phone: "",
-      password_confirm: "",
+      nid: "",
+      role: "dealer",
     },
   });
 
-  function onSubmit(data: any) {
+  async function onSubmit(data: any) {
     // convert json to formData
     const formData = new FormData();
 
     // Append all form fields to formData
     Object.keys(data).forEach((key) => {
       if (key === "image" && data[key] instanceof File) {
-        formData.append(key, data[key] as File);
-      } else if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, data[key] as string);
+        formData.append("file", data[key] as File);
       }
     });
 
-    console.log(data);
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
+    formData.append(
+      "data",
+      JSON.stringify({
+        name: data.name,
+        phone: data.phone,
+        nid: data.nid,
+        role: data.role,
+      }) as string
+    );
+
+    for (const pair of formData.entries()) {
+      console.log(pair[0], pair[1]);
+    }
+
+    try {
+      setLoading(true);
+      await axiosInstance.post("/users", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      toast({
+        variant: "default",
+        title: "Dealer added successfully!",
+        description: "You have added a new Dealer.",
+      });
+      setLoading(false);
+      refetch();
+      setSuccess(true);
+    } catch (e: any) {
+      setLoading(false);
+
+      console.log(e.response.data.message);
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: e.response.data.message,
+      });
+    }
+    setLoading(false);
 
     form.reset();
     setImagePreview(null);
@@ -137,10 +152,10 @@ export function AddSrForm() {
             Congratulations
           </p>
           <p className="text-[#8A94A6] text-[14px]">
-            SR account successfully created.
+            Dealer successfully added.
           </p>
           <br />
-          <Button onClick={() => restForm()}>Add New SR</Button>
+          <Button onClick={() => restForm()}>Add New Dealer</Button>
         </div>
       ) : (
         <Form {...form}>
@@ -198,59 +213,6 @@ export function AddSrForm() {
                 <div className="flex-1">
                   <FormField
                     control={form.control}
-                    name="company"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Company</FormLabel>
-                        <FormControl>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select Your Company" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectGroup>
-                                <SelectLabel>Select Your Company</SelectLabel>
-                                <SelectItem value="apple">Apple</SelectItem>
-                                <SelectItem value="banana">Banana</SelectItem>
-                                <SelectItem value="blueberry">
-                                  Blueberry
-                                </SelectItem>
-                                <SelectItem value="grapes">Grapes</SelectItem>
-                                <SelectItem value="pineapple">
-                                  Pineapple
-                                </SelectItem>
-                              </SelectGroup>
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-              <div className="w-full flex items-start justify-around gap-3">
-                <div className="flex-1">
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="rasel@gmail.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="flex-1">
-                  <FormField
-                    control={form.control}
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
@@ -268,6 +230,7 @@ export function AddSrForm() {
                   />
                 </div>
               </div>
+              <br />
 
               <div className="w-full flex items-start justify-around gap-3">
                 <div className="flex-1">
@@ -292,74 +255,41 @@ export function AddSrForm() {
                 <div className="flex-1">
                   <FormField
                     control={form.control}
-                    name="dealer"
+                    name="role"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Select Dealer</FormLabel>
+                        <FormLabel>Select Role</FormLabel>
                         <FormControl>
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
                           >
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select Your Dealer" />
+                              <SelectValue placeholder="Select Role" />
                             </SelectTrigger>
                             <SelectContent>
                               <SelectGroup>
-                                <SelectLabel>Select Your Dealer</SelectLabel>
-                                <SelectItem value="apple">Apple</SelectItem>
-                                <SelectItem value="banana">Banana</SelectItem>
-                                <SelectItem value="blueberry">
-                                  Blueberry
+                                <SelectLabel>Select Role</SelectLabel>
+                                <SelectItem value="sr">Sr</SelectItem>
+                                <SelectItem value="dealer">Dealer</SelectItem>
+                                <SelectItem value="pickupMan">
+                                  Pickup Man
                                 </SelectItem>
-                                <SelectItem value="grapes">Grapes</SelectItem>
-                                <SelectItem value="pineapple">
-                                  Pineapple
+                                <SelectItem value="packingMan">
+                                  Packing Man
+                                </SelectItem>
+                                <SelectItem value="checkoutMan">
+                                  Checkout Man
+                                </SelectItem>
+                                <SelectItem value="deliveryMan">
+                                  Delivery Man
+                                </SelectItem>
+                                <SelectItem value="freelancer">
+                                  Freelancer
                                 </SelectItem>
                               </SelectGroup>
                             </SelectContent>
                           </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-
-              <div className="w-full flex items-start justify-around gap-3">
-                <div className="flex-1">
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Set Password</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="*******"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="flex-1">
-                  <FormField
-                    control={form.control}
-                    name="password_confirm"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Confirm Password</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="*******"
-                            {...field}
-                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -375,7 +305,10 @@ export function AddSrForm() {
                   Cancel
                 </Button>
               </DialogClose>
-              <Button type="submit">Submit</Button>
+              <Button disabled={loading} type="submit">
+                {loading && <Loader2 className="animate-spin" />}
+                Submit
+              </Button>
             </div>
           </form>
         </Form>

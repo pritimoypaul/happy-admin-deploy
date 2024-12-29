@@ -13,13 +13,21 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { AddSrForm } from "./_addForm";
+import { AddDealerForm } from "./_addForm";
+import { useDealerList } from "@/utils/apis/getDealer";
+import { dealer } from "@/types/dealer";
+import { Company } from "@/types/company";
 
 const Dealer = () => {
   const { height } = useWindowDimensions();
   const [viewFormat, setViewFormat] = useState<string>("gridview");
 
   const mainComponentHeight = height - 300;
+
+  const [limit] = useState(10);
+  const [selectedPage] = useState(1);
+
+  const { data, isFetched, refetch } = useDealerList(limit, selectedPage);
 
   return (
     <div className="h-full">
@@ -50,7 +58,7 @@ const Dealer = () => {
                 <DialogTitle></DialogTitle>
                 <DialogDescription></DialogDescription>
               </DialogHeader>
-              <AddSrForm />
+              <AddDealerForm refetch={refetch} />
             </DialogContent>
           </Dialog>
         </div>
@@ -118,66 +126,18 @@ const Dealer = () => {
           className="overflow-scroll px-[24px] pt-[24px] grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4"
           style={{ height: `${mainComponentHeight}px`, paddingBottom: "200px" }}
         >
-          <ProfileCard
-            name="রমজান আলী"
-            details="Pran Food & Bavreage"
-            image="/images/man.png"
-            url="/admin/dealer-profile"
-          />
-          <ProfileCard
-            name="রমজান আলী"
-            details="Pran Food & Bavreage"
-            image="/images/man.png"
-            url="/admin/dealer-profile"
-          />
-          <ProfileCard
-            name="রমজান আলী"
-            details="Pran Food & Bavreage"
-            image="/images/man.png"
-            url="/admin/dealer-profile"
-          />
-          <ProfileCard
-            name="রমজান আলী"
-            details="Pran Food & Bavreage"
-            image="/images/man.png"
-            url="/admin/dealer-profile"
-          />
-          <ProfileCard
-            name="রমজান আলী"
-            details="Pran Food & Bavreage"
-            image="/images/man.png"
-            url="/admin/dealer-profile"
-          />
-          <ProfileCard
-            name="রমজান আলী"
-            details="Pran Food & Bavreage"
-            image="/images/man.png"
-            url="/admin/dealer-profile"
-          />
-          <ProfileCard
-            name="রমজান আলী"
-            details="Pran Food & Bavreage"
-            image="/images/man.png"
-            url="/admin/dealer-profile"
-          />
-          <ProfileCard
-            name="রমজান আলী"
-            details="Pran Food & Bavreage"
-            image="/images/man.png"
-            url="/admin/dealer-profile"
-          />
-          <ProfileCard
-            name="রমজান আলী"
-            details="Pran Food & Bavreage"
-            image="/images/man.png"
-            url="/admin/dealer-profile"
-          />
-          <ProfileCard
-            name="রমজান আলী"
-            details="Pran Food & Bavreage"
-            image="/images/man.png"
-            url="/admin/dealer-profile"
-          />
+          {isFetched &&
+            data?.data?.result?.map(
+              (dealer: { companies: Array<Company>; dealer: dealer }) => (
+                <ProfileCard
+                  key={dealer?.dealer?._id}
+                  name={dealer?.dealer?.name}
+                  details={dealer?.dealer?.phone}
+                  image={dealer?.dealer?.profileImg}
+                  url="/admin/dealer-profile"
+                />
+              )
+            )}
         </div>
       </div>
     </div>

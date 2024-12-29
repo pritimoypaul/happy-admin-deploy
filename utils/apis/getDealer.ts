@@ -2,12 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "../axios";
 import { buildUrl } from "../urlBuilder";
 
-async function getArea(limit: number, selectedPage: number, unionId?: string) {
-  const url = buildUrl("/api/v1/area", {
+async function getDealer(limit: number, selectedPage: number) {
+  const url = buildUrl("/api/v1/dealers", {
     limit: limit,
     page: selectedPage,
-    union: unionId,
-    sort: 'name',
+    sort: '-_id',
   });
   try {
     const response = await axiosInstance.get(url);
@@ -17,13 +16,12 @@ async function getArea(limit: number, selectedPage: number, unionId?: string) {
   }
 }
 
-export const useAreaList = (
+export const useDealerList = (
   limit: number,
   selectedPage: number,
-  unionId?: string
 ) => {
   return useQuery({
-    queryKey: ["area-list"],
-    queryFn: () => getArea(limit, selectedPage, unionId),
+    queryKey: ["dealer-list"],
+    queryFn: () => getDealer(limit, selectedPage),
   });
 };

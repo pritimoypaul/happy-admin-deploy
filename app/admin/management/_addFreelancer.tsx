@@ -57,7 +57,7 @@ export function AddFreelancerForm({ refetch }: any) {
       name: "",
       phone: "",
       nid: "",
-      role: "",
+      role: "freelancer",
     },
   });
 
@@ -257,7 +257,7 @@ export function AddFreelancerForm({ refetch }: any) {
                     name="role"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Select Dealer</FormLabel>
+                        <FormLabel>Select Role</FormLabel>
                         <FormControl>
                           <Select
                             onValueChange={field.onChange}
