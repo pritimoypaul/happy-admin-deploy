@@ -12,11 +12,17 @@ interface ProductCardProps {
   url: string;
 }
 
-const ProductCardEditable = ({ name, details, image, quantity, price }: ProductCardProps) => {
+const ProductCardEditable = ({
+  name,
+  details,
+  image,
+  quantity,
+  price,
+}: ProductCardProps) => {
   return (
     <div className="group bg-[#ffffff] w-full h-[238px] flex flex-col justify-center items-center py-[44px] rounded-[12px] relative hover:bg-[#ffffff] border-[1px] border-[#007AFF21] hover:border-[1px] hover:border-[#007AFF99]">
       <DialogTrigger>
-        <button className="absolute hidden group-hover:flex items-center gap-2 text-[13px] text-[#8A94A6] top-0 right-0 px-4 py-2 border-b-[1px] border-l-[1px] rounded-l-[12px] rounded-t-[0px]">
+        <div className="absolute hidden group-hover:flex items-center gap-2 text-[13px] text-[#8A94A6] top-0 right-0 px-4 py-2 border-b-[1px] border-l-[1px] rounded-l-[12px] rounded-t-[0px]">
           <Image
             src={"/icons/edit-icon.svg"}
             alt="edit"
@@ -24,7 +30,7 @@ const ProductCardEditable = ({ name, details, image, quantity, price }: ProductC
             width={12}
           />
           <p>Edit</p>
-        </button>
+        </div>
       </DialogTrigger>
       <div className="h-[98px] w-[98px] mb-[20px]">
         <Image

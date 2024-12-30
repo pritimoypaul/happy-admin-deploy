@@ -19,18 +19,23 @@ import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { DialogClose } from "@/components/ui/dialog";
 import { useState } from "react";
 import Image from "next/image";
+import { useCategoryList } from "@/utils/apis/getCategory";
+import { useDealerList } from "@/utils/apis/getDealer";
+import { useCompanyList } from "@/utils/apis/getCompany";
+import { Category } from "@/types/category";
+import { Company } from "@/types/company";
+import axiosInstance from "@/utils/axios";
+import { Loader2 } from "lucide-react";
 
 const FormSchema = z.object({
-  image: z.instanceof(File, { message: "Profile picture is required" }),
+  image: z.instanceof(File).optional(),
   product_name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
@@ -66,54 +71,110 @@ const FormSchema = z.object({
   }),
 });
 
-export function EditProductForm() {
+export function EditProductForm({ refetchData, editData }: any) {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
+
+  const { data: categoryData, isFetched: categoryFetched } = useCategoryList(
+    100,
+    1
+  );
+
+  const { data: dealerData, isFetched: dealerFetched } = useDealerList(100, 1);
+
+  const { data: companyData, isFetched: companyFetched } = useCompanyList(
+    100,
+    1
+  );
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       image: undefined,
-      product_name: "",
-      product_name_bangla: "",
-      category: "",
-      piece: "",
-      box_type: "",
-      rate: "",
-      stock: "",
-      profit_margin: "",
-      dealer: "",
-      company: "",
-      h_profit: "",
+      product_name: editData?.name,
+      product_name_bangla: editData?.bnName,
+      category: editData?.category,
+      piece: editData?.quantityPerPackage.toString(),
+      box_type: editData?.packageType,
+      rate: editData?.price.toString(),
+      stock: editData?.stock.toString(),
+      profit_margin: editData?.ourCommission.toString(),
+      dealer: editData?.dealer,
+      company: editData?.company,
+      h_profit: editData?.dealerCommission.toString(),
     },
   });
 
-  function onSubmit(data: any) {
+  async function onSubmit(data: any) {
+    const editedData = {
+      name: data.product_name,
+      bnName: data.product_name_bangla,
+      category: data.category,
+      company: data.company,
+      dealer: data.dealer,
+      packageType: data.box_type,
+      quantityPerPackage: Number(data.piece),
+      stock: Number(data.stock),
+      price: Number(data.rate),
+      dealerCommission: Number(data.h_profit),
+      ourCommission: Number(data.profit_margin),
+      status: "Active",
+    };
     // convert json to formData
     const formData = new FormData();
 
     // Append all form fields to formData
     Object.keys(data).forEach((key) => {
       if (key === "image" && data[key] instanceof File) {
-        formData.append(key, data[key] as File);
-      } else if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, data[key] as string);
+        formData.append("file", data[key] as File);
       }
     });
 
-    console.log(data);
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
+    try {
+      setLoading(true);
+
+      Object.keys(data).forEach((key) => {
+        if (key === "image" && data[key] instanceof File) {
+          axiosInstance
+            .patch(`/products/${editData?.id}/update-image`, formData, {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            })
+            .then(() => {
+              refetchData();
+            })
+            .catch(() => {
+              console.log("image not uploaded");
+            });
+        }
+      });
+
+      await axiosInstance.patch(`/products/${editData?.id}/update`, editedData);
+
+      toast({
+        variant: "default",
+        title: "Product updated successfully!",
+        description: "You have updated a Product.",
+      });
+      setLoading(false);
+      refetchData();
+      setSuccess(true);
+    } catch (e: any) {
+      setLoading(false);
+
+      console.log(e.response.data.message);
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: e.response.data.message,
+      });
+    }
+    setLoading(false);
 
     form.reset();
     setImagePreview(null);
-    setSuccess(true);
   }
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,12 +187,6 @@ export function EditProductForm() {
       };
       reader.readAsDataURL(file);
     }
-  };
-
-  const restForm = () => {
-    form.reset();
-    setImagePreview(null);
-    setSuccess(false);
   };
 
   return (
@@ -149,10 +204,9 @@ export function EditProductForm() {
             Congratulations
           </p>
           <p className="text-[#8A94A6] text-[14px]">
-            Product successfully created.
+            Product successfully updated.
           </p>
           <br />
-          <Button onClick={() => restForm()}>Add New Product</Button>
         </div>
       ) : (
         <Form {...form}>
@@ -173,7 +227,7 @@ export function EditProductForm() {
                           ref={field.ref}
                         />
                       </FormControl>
-                      {imagePreview && (
+                      {imagePreview ? (
                         <Image
                           src={imagePreview}
                           alt="Preview"
@@ -181,7 +235,15 @@ export function EditProductForm() {
                           height={32}
                           width={32}
                         />
-                      )}
+                      ) : editData?.image != "" || editData?.image != null ? (
+                        <Image
+                          src={editData?.image}
+                          alt="Preview"
+                          className="mt-2 w-32 h-32 object-cover"
+                          height={32}
+                          width={32}
+                        />
+                      ) : null}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -241,20 +303,17 @@ export function EditProductForm() {
                               <SelectValue placeholder="Select Product Category" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectGroup>
-                                <SelectLabel>
-                                  Select Product Category
-                                </SelectLabel>
-                                <SelectItem value="apple">Apple</SelectItem>
-                                <SelectItem value="banana">Banana</SelectItem>
-                                <SelectItem value="blueberry">
-                                  Blueberry
-                                </SelectItem>
-                                <SelectItem value="grapes">Grapes</SelectItem>
-                                <SelectItem value="pineapple">
-                                  Pineapple
-                                </SelectItem>
-                              </SelectGroup>
+                              {categoryFetched &&
+                                categoryData?.data?.result?.map(
+                                  (category: Category) => (
+                                    <SelectItem
+                                      key={category.id}
+                                      value={category.id}
+                                    >
+                                      {category.name}
+                                    </SelectItem>
+                                  )
+                                )}
                             </SelectContent>
                           </Select>
                         </FormControl>
@@ -297,15 +356,11 @@ export function EditProductForm() {
                               <SelectValue placeholder="Select Box Type" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
+                              <SelectItem value="বক্স">বক্স</SelectItem>
+                              <SelectItem value="কার্টুন">কার্টুন</SelectItem>
+                              <SelectItem value="ডজন">ডজন</SelectItem>
+                              <SelectItem value="পিস/পিচ">পিস/পিচ</SelectItem>
+                              <SelectItem value="কেস">কেস</SelectItem>
                             </SelectContent>
                           </Select>
                         </FormControl>
@@ -371,13 +426,27 @@ export function EditProductForm() {
                     name="dealer"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Select Dealer</FormLabel>
+                        <FormLabel>Dealer</FormLabel>
                         <FormControl>
-                          <Input
-                            type="text"
-                            placeholder="Select Dealer"
-                            {...field}
-                          />
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select Dealer" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {dealerFetched &&
+                                dealerData?.data?.result?.map((dealer: any) => (
+                                  <SelectItem
+                                    key={dealer?.dealer?.id}
+                                    value={dealer?.dealer?.id}
+                                  >
+                                    {dealer?.dealer.name}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -390,13 +459,29 @@ export function EditProductForm() {
                     name="company"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Select Company</FormLabel>
+                        <FormLabel>Company</FormLabel>
                         <FormControl>
-                          <Input
-                            type="text"
-                            placeholder="Select Company"
-                            {...field}
-                          />
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select Company" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {companyFetched &&
+                                companyData?.data?.result?.map(
+                                  (company: Company) => (
+                                    <SelectItem
+                                      key={company.id}
+                                      value={company.id}
+                                    >
+                                      {company.name}
+                                    </SelectItem>
+                                  )
+                                )}
+                            </SelectContent>
+                          </Select>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -431,7 +516,10 @@ export function EditProductForm() {
                   Cancel
                 </Button>
               </DialogClose>
-              <Button type="submit">Save</Button>
+              <Button disabled={loading} type="submit">
+                {loading && <Loader2 className="animate-spin" />}
+                Save
+              </Button>
             </div>
           </form>
         </Form>

@@ -23,13 +23,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DialogClose } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import Image from "next/image";
 import { useUpazilaList } from "@/utils/apis/getUpazila";
 import { Upazila } from "@/types/upazila";
 import axiosInstance from "@/utils/axios";
 import { Loader2 } from "lucide-react";
-// import { MultiSelect } from "@/components/ui/multi-select";
+
+import { X } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
+import {
+  Command,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Command as CommandPrimitive } from "cmdk";
+
+type Framework = Record<"value" | "label", string>;
 
 const FormSchema = z.object({
   upazila: z.string().min(2, {
@@ -41,17 +53,58 @@ export function AssignUpazillaForm({ id, refetch }: any) {
   const [success, setSuccess] = useState<boolean>(false);
   const [selectedUpazila, setSelectedUpazila] = useState("");
   const [loading, setLoading] = useState(false);
-  //   const [upazilaList, setUpazilaList] = useState([
-  //     { value: "react", label: "React" },
-  //     { value: "angular", label: "Angular" },
-  //     { value: "vue", label: "Vue" },
-  //     { value: "svelte", label: "Svelte" },
-  //     { value: "ember", label: "Ember" },
-  //   ]);
-  //   const [selectedUpazilas, setSelectedUpazilas] = useState<string[]>([
-  //     "react",
-  //     "angular",
-  //   ]);
+
+  //for multiselect
+
+  const FRAMEWORKS = [
+    {
+      value: "paba",
+      label: "Paba",
+    },
+    {
+      value: "durgapur",
+      label: "Durgapur",
+    },
+  ] satisfies Framework[];
+
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<Framework[]>([FRAMEWORKS[1]]);
+  const [inputValue, setInputValue] = useState("");
+
+  const handleUnselect = useCallback((framework: Framework) => {
+    setSelected((prev) => prev.filter((s) => s.value !== framework.value));
+  }, []);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      const input = inputRef.current;
+      if (input) {
+        if (e.key === "Delete" || e.key === "Backspace") {
+          if (input.value === "") {
+            setSelected((prev) => {
+              const newSelected = [...prev];
+              newSelected.pop();
+              return newSelected;
+            });
+          }
+        }
+        // This is not a default behaviour of the <input /> field
+        if (e.key === "Escape") {
+          input.blur();
+        }
+      }
+    },
+    []
+  );
+
+  const selectables = FRAMEWORKS.filter(
+    (framework) => !selected.includes(framework)
+  );
+
+  console.log(selectables, selected, inputValue);
+
+  //for multiselect
 
   const { data: upazilaData, isFetched: upazilaFetched } = useUpazilaList();
 
@@ -141,7 +194,7 @@ export function AssignUpazillaForm({ id, refetch }: any) {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div>
-              <div className="w-full flex items-start justify-around gap-3">
+              <div className="w-full h-[400px] flex items-start justify-around gap-3">
                 <div className="flex-1">
                   <FormField
                     control={form.control}
@@ -179,6 +232,87 @@ export function AssignUpazillaForm({ id, refetch }: any) {
                       </FormItem>
                     )}
                   />
+
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+
+                  {/* multi select */}
+                  <Command
+                    onKeyDown={handleKeyDown}
+                    className="overflow-visible bg-transparent"
+                  >
+                    <div className="group rounded-md border border-input px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                      <div className="flex flex-wrap gap-1">
+                        {selected.map((framework) => {
+                          return (
+                            <Badge key={framework.value} variant="secondary">
+                              {framework.label}
+                              <button
+                                className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    handleUnselect(framework);
+                                  }
+                                }}
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                }}
+                                onClick={() => handleUnselect(framework)}
+                              >
+                                <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                              </button>
+                            </Badge>
+                          );
+                        })}
+                        {/* Avoid having the "Search" Icon */}
+                        <CommandPrimitive.Input
+                          ref={inputRef}
+                          value={inputValue}
+                          onValueChange={setInputValue}
+                          onBlur={() => setOpen(false)}
+                          onFocus={() => setOpen(true)}
+                          placeholder="Select frameworks..."
+                          className="ml-2 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
+                        />
+                      </div>
+                    </div>
+                    <div className="relative mt-2">
+                      <CommandList>
+                        {open && selectables.length > 0 ? (
+                          <div className="absolute top-0 z-10 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
+                            <CommandGroup className="h-full overflow-auto">
+                              {selectables.map((framework) => {
+                                return (
+                                  <CommandItem
+                                    key={framework.value}
+                                    onMouseDown={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                    }}
+                                    onSelect={() => {
+                                      setInputValue("");
+                                      setSelected((prev) => [
+                                        ...prev,
+                                        framework,
+                                      ]);
+                                    }}
+                                    className={"cursor-pointer"}
+                                  >
+                                    {framework.label}
+                                  </CommandItem>
+                                );
+                              })}
+                            </CommandGroup>
+                          </div>
+                        ) : null}
+                      </CommandList>
+                    </div>
+                  </Command>
                 </div>
               </div>
             </div>

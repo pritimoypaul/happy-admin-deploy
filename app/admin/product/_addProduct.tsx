@@ -19,15 +19,20 @@ import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { DialogClose } from "@/components/ui/dialog";
 import { useState } from "react";
 import Image from "next/image";
+import { useCategoryList } from "@/utils/apis/getCategory";
+import { useDealerList } from "@/utils/apis/getDealer";
+import { useCompanyList } from "@/utils/apis/getCompany";
+import { Category } from "@/types/category";
+import { Company } from "@/types/company";
+import axiosInstance from "@/utils/axios";
+import { Loader2 } from "lucide-react";
 
 const FormSchema = z.object({
   image: z.instanceof(File, { message: "Profile picture is required" }),
@@ -66,9 +71,22 @@ const FormSchema = z.object({
   }),
 });
 
-export function AddProductForm() {
+export function AddProductForm({ refetchData }: any) {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
+
+  const { data: categoryData, isFetched: categoryFetched } = useCategoryList(
+    100,
+    1
+  );
+
+  const { data: dealerData, isFetched: dealerFetched } = useDealerList(100, 1);
+
+  const { data: companyData, isFetched: companyFetched } = useCompanyList(
+    100,
+    1
+  );
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -88,32 +106,69 @@ export function AddProductForm() {
     },
   });
 
-  function onSubmit(data: any) {
+  async function onSubmit(data: any) {
     // convert json to formData
     const formData = new FormData();
 
     // Append all form fields to formData
     Object.keys(data).forEach((key) => {
       if (key === "image" && data[key] instanceof File) {
-        formData.append(key, data[key] as File);
-      } else if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, data[key] as string);
+        formData.append("file", data[key] as File);
       }
     });
 
-    console.log(data);
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
+    formData.append(
+      "data",
+      JSON.stringify({
+        name: data.product_name,
+        bnName: data.product_name_bangla,
+        category: data.category,
+        company: data.company,
+        dealer: data.dealer,
+        packageType: data.box_type,
+        quantityPerPackage: Number(data.piece),
+        stock: Number(data.stock),
+        price: Number(data.rate),
+        dealerCommission: Number(data.h_profit),
+        ourCommission: Number(data.profit_margin),
+        status: "Active",
+      }) as string
+    );
+
+    for (const pair of formData.entries()) {
+      console.log(pair[0], pair[1]);
+    }
+
+    try {
+      setLoading(true);
+      await axiosInstance.post("/products", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      toast({
+        variant: "default",
+        title: "Product added successfully!",
+        description: "You have added a new Product.",
+      });
+      setLoading(false);
+      refetchData();
+      setSuccess(true);
+    } catch (e: any) {
+      setLoading(false);
+
+      console.log(e.response.data.message);
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: e.response.data.message,
+      });
+    }
+    setLoading(false);
 
     form.reset();
     setImagePreview(null);
-    setSuccess(true);
   }
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -241,20 +296,17 @@ export function AddProductForm() {
                               <SelectValue placeholder="Select Product Category" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectGroup>
-                                <SelectLabel>
-                                  Select Product Category
-                                </SelectLabel>
-                                <SelectItem value="apple">Apple</SelectItem>
-                                <SelectItem value="banana">Banana</SelectItem>
-                                <SelectItem value="blueberry">
-                                  Blueberry
-                                </SelectItem>
-                                <SelectItem value="grapes">Grapes</SelectItem>
-                                <SelectItem value="pineapple">
-                                  Pineapple
-                                </SelectItem>
-                              </SelectGroup>
+                              {categoryFetched &&
+                                categoryData?.data?.result?.map(
+                                  (category: Category) => (
+                                    <SelectItem
+                                      key={category._id}
+                                      value={category._id}
+                                    >
+                                      {category.name}
+                                    </SelectItem>
+                                  )
+                                )}
                             </SelectContent>
                           </Select>
                         </FormControl>
@@ -297,15 +349,11 @@ export function AddProductForm() {
                               <SelectValue placeholder="Select Box Type" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="apple">Apple</SelectItem>
-                              <SelectItem value="banana">Banana</SelectItem>
-                              <SelectItem value="blueberry">
-                                Blueberry
-                              </SelectItem>
-                              <SelectItem value="grapes">Grapes</SelectItem>
-                              <SelectItem value="pineapple">
-                                Pineapple
-                              </SelectItem>
+                              <SelectItem value="বক্স">বক্স</SelectItem>
+                              <SelectItem value="কার্টুন">কার্টুন</SelectItem>
+                              <SelectItem value="ডজন">ডজন</SelectItem>
+                              <SelectItem value="পিস/পিচ">পিস/পিচ</SelectItem>
+                              <SelectItem value="কেস">কেস</SelectItem>
                             </SelectContent>
                           </Select>
                         </FormControl>
@@ -371,13 +419,27 @@ export function AddProductForm() {
                     name="dealer"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Select Dealer</FormLabel>
+                        <FormLabel>Dealer</FormLabel>
                         <FormControl>
-                          <Input
-                            type="text"
-                            placeholder="Select Dealer"
-                            {...field}
-                          />
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select Dealer" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {dealerFetched &&
+                                dealerData?.data?.result?.map((dealer: any) => (
+                                  <SelectItem
+                                    key={dealer?._id}
+                                    value={dealer?._id}
+                                  >
+                                    {dealer?.dealer.name}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -390,13 +452,29 @@ export function AddProductForm() {
                     name="company"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Select Company</FormLabel>
+                        <FormLabel>Company</FormLabel>
                         <FormControl>
-                          <Input
-                            type="text"
-                            placeholder="Select Company"
-                            {...field}
-                          />
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select Company" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {companyFetched &&
+                                companyData?.data?.result?.map(
+                                  (company: Company) => (
+                                    <SelectItem
+                                      key={company._id}
+                                      value={company._id}
+                                    >
+                                      {company.name}
+                                    </SelectItem>
+                                  )
+                                )}
+                            </SelectContent>
+                          </Select>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -431,7 +509,10 @@ export function AddProductForm() {
                   Cancel
                 </Button>
               </DialogClose>
-              <Button type="submit">Save</Button>
+              <Button disabled={loading} type="submit">
+                {loading && <Loader2 className="animate-spin" />}
+                Save
+              </Button>
             </div>
           </form>
         </Form>

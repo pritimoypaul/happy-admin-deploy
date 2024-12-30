@@ -40,6 +40,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -57,7 +58,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 
 const FreelancerProfileScreen = ({
@@ -87,6 +87,8 @@ const FreelancerProfileScreen = ({
   const { data: detailsData, refetch: detailsRefetch } =
     useFreelancerDetails(id);
 
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <div className="h-full">
       {/* top elements */}
@@ -104,30 +106,22 @@ const FreelancerProfileScreen = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56 absolute right-[0px] top-2">
               <DropdownMenuLabel></DropdownMenuLabel>
-              <ul className="p-4">
-                <Dialog>
-                  <DialogTrigger>
-                    <li className="flex items-center gap-2">
-                      <Image
-                        src="/icons/edit-icon.svg"
-                        height={10}
-                        width={10}
-                        alt="edit"
-                      />
-                      <p className="text-[14px] text-[#8A94A6]">
-                        Assign Upazilla
-                      </p>
-                    </li>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-[450px] max-h-[90%] overflow-scroll">
-                    <DialogHeader>
-                      <DialogTitle>Assign Upazila</DialogTitle>
-                      <DialogDescription></DialogDescription>
-                    </DialogHeader>
-                    <AssignUpazillaForm id={id} refetch={detailsRefetch} />
-                  </DialogContent>
-                </Dialog>
+              <DropdownMenuItem>
+                <li
+                  className="flex items-center gap-2"
+                  onClick={() => setIsOpen(true)}
+                >
+                  <Image
+                    src="/icons/edit-icon.svg"
+                    height={10}
+                    width={10}
+                    alt="edit"
+                  />
+                  <p className="text-[14px] text-[#8A94A6]">Assign Upazilla</p>
+                </li>
+              </DropdownMenuItem>
 
+              <DropdownMenuItem>
                 <li className="mt-[10px] flex items-center gap-2">
                   <Image
                     src="/icons/delete-icon.svg"
@@ -137,7 +131,7 @@ const FreelancerProfileScreen = ({
                   />
                   <p className="text-[14px] text-[#FF565E]">Block</p>
                 </li>
-              </ul>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -201,6 +195,16 @@ const FreelancerProfileScreen = ({
           <p className="font-medium text-[16px] text-[#FF8F6B]">-1.7k</p>
         </div> */}
       </div>
+
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="max-w-[450px] max-h-[90%] overflow-scroll">
+          <DialogHeader>
+            <DialogTitle>Assign Upazila</DialogTitle>
+            <DialogDescription></DialogDescription>
+          </DialogHeader>
+          <AssignUpazillaForm id={id} refetch={detailsRefetch} />
+        </DialogContent>
+      </Dialog>
 
       <div
         className="w-full overflow-hidden mt-[30px] bg-[#ffffff] rounded-[12px] relative"

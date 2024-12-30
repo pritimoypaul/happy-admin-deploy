@@ -31,12 +31,9 @@ const MainProducts = () => {
 
   const [limit] = useState(10);
   const [selectedPage] = useState(1);
+  const [editData, setEditData] = useState({});
 
-  const {data, isFetched} = useProductList(
-    limit,
-    selectedPage
-  )
-
+  const { data, isFetched, refetch } = useProductList(limit, selectedPage);
 
   return (
     <div
@@ -86,7 +83,7 @@ const MainProducts = () => {
                   <DialogTitle>Add New Product</DialogTitle>
                   <DialogDescription></DialogDescription>
                 </DialogHeader>
-                <AddProductForm />
+                <AddProductForm refetchData={refetch} />
               </DialogContent>
             </Dialog>
           </div>
@@ -97,29 +94,26 @@ const MainProducts = () => {
           className="overflow-scroll px-[24px] pt-[24px] grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4"
           style={{ height: `${mainComponentHeight}px`, paddingBottom: "200px" }}
         >
-          {
-            isFetched && 
-            data?.data?.result?.map((product : Product)=>(
-              <ProductCardEditable
-              key={product._id}
-            name={product.bnName}
-            details={product.name}
-            image={product.image}
-            quantity={product.quantityPerPackage}
-            price={product.price}
-            url={`/admin/products/${product._id}`}
-          />
-            ))
-          }
-          
-          
+          {isFetched &&
+            data?.data?.result?.map((product: Product) => (
+              <div key={product._id} onClick={() => setEditData(product)}>
+                <ProductCardEditable
+                  name={product.bnName}
+                  details={product.name}
+                  image={product.image}
+                  quantity={product.quantityPerPackage}
+                  price={product.price}
+                  url={`/admin/products/${product._id}`}
+                />
+              </div>
+            ))}
         </div>
         <DialogContent className="max-w-[650px] max-h-[90%] overflow-scroll">
           <DialogHeader>
             <DialogTitle>Edit Product</DialogTitle>
             <DialogDescription></DialogDescription>
           </DialogHeader>
-          <EditProductForm />
+          <EditProductForm refetchData={refetch} editData={editData} />
         </DialogContent>
       </Dialog>
     </div>

@@ -131,6 +131,8 @@ export function EditRetailerForm({ editData, refetchData }: any) {
 
   async function onSubmit(data: any) {
     const editedData = {
+      phone: data.retailer_phone,
+      name: data.retailer_name,
       shopName: data.shop_name,
       union: data.union,
       environment: data.environment,
@@ -245,7 +247,7 @@ export function EditRetailerForm({ editData, refetchData }: any) {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="w-full flex items-center gap-3">
-              {/* <div className="w-full max-w-sm items-center flex-1">
+              <div className="w-full max-w-sm items-center flex-1">
                 <FormField
                   control={form.control}
                   name="retailer_phone"
@@ -263,7 +265,7 @@ export function EditRetailerForm({ editData, refetchData }: any) {
                     </FormItem>
                   )}
                 />
-              </div> */}
+              </div>
               <div className="flex-1"></div>
             </div>
 
@@ -356,7 +358,7 @@ export function EditRetailerForm({ editData, refetchData }: any) {
               </div>
               <br />
               <div className="w-full flex items-start justify-around gap-3">
-                {/* <div className="flex-1">
+                <div className="flex-1">
                   <FormField
                     control={form.control}
                     name="retailer_name"
@@ -374,7 +376,7 @@ export function EditRetailerForm({ editData, refetchData }: any) {
                       </FormItem>
                     )}
                   />
-                </div> */}
+                </div>
                 <div className="flex-1">
                   <FormField
                     control={form.control}
