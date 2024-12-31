@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import useWindowDimensions from "@/utils/windowSize";
 import Image from "next/image";
-import React, { use, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 
 import { addDays, format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
@@ -40,7 +40,6 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -89,6 +88,12 @@ const FreelancerProfileScreen = ({
 
   const [isOpen, setIsOpen] = useState(false);
 
+  useEffect(() => {
+    return () => {
+      document.body.style.pointerEvents = "";
+    };
+  }, [isOpen]);
+
   return (
     <div className="h-full">
       {/* top elements */}
@@ -106,9 +111,9 @@ const FreelancerProfileScreen = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56 absolute right-[0px] top-2">
               <DropdownMenuLabel></DropdownMenuLabel>
-              <DropdownMenuItem>
+              <ul className="p-3">
                 <li
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 cursor-pointer"
                   onClick={() => setIsOpen(true)}
                 >
                   <Image
@@ -119,10 +124,8 @@ const FreelancerProfileScreen = ({
                   />
                   <p className="text-[14px] text-[#8A94A6]">Assign Upazilla</p>
                 </li>
-              </DropdownMenuItem>
 
-              <DropdownMenuItem>
-                <li className="mt-[10px] flex items-center gap-2">
+                <li className="mt-[10px] flex items-center gap-2 cursor-pointer">
                   <Image
                     src="/icons/delete-icon.svg"
                     height={10}
@@ -131,7 +134,7 @@ const FreelancerProfileScreen = ({
                   />
                   <p className="text-[14px] text-[#FF565E]">Block</p>
                 </li>
-              </DropdownMenuItem>
+              </ul>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -195,16 +198,6 @@ const FreelancerProfileScreen = ({
           <p className="font-medium text-[16px] text-[#FF8F6B]">-1.7k</p>
         </div> */}
       </div>
-
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-[450px] max-h-[90%] overflow-scroll">
-          <DialogHeader>
-            <DialogTitle>Assign Upazila</DialogTitle>
-            <DialogDescription></DialogDescription>
-          </DialogHeader>
-          <AssignUpazillaForm id={id} refetch={detailsRefetch} />
-        </DialogContent>
-      </Dialog>
 
       <div
         className="w-full overflow-hidden mt-[30px] bg-[#ffffff] rounded-[12px] relative"
@@ -325,6 +318,16 @@ const FreelancerProfileScreen = ({
           </div>
         </div>
       </div>
+
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="max-w-[450px] max-h-[90%] overflow-scroll">
+          <DialogHeader>
+            <DialogTitle>Assign Upazila</DialogTitle>
+            <DialogDescription></DialogDescription>
+          </DialogHeader>
+          <AssignUpazillaForm id={id} refetch={detailsRefetch} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -1,6 +1,4 @@
-import { Button } from "@/components/ui/button";
 import useWindowDimensions from "@/utils/windowSize";
-import Image from "next/image";
 import React, { useState } from "react";
 
 import {
@@ -26,6 +24,16 @@ import CategoryBox from "@/components/core/categoryBox";
 import { Input } from "@/components/ui/input";
 import { useCategoryList } from "@/utils/apis/getCategory";
 import { Category } from "@/types/category";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { AddButton } from "@/components/core/addButton";
+import { AddCategoryForm } from "./_addCategoryForm";
 
 const MainCategoryScreen = () => {
   const { height } = useWindowDimensions();
@@ -35,10 +43,7 @@ const MainCategoryScreen = () => {
   const [limit] = useState(10);
   const [selectedPage] = useState(1);
 
-  const {data, isFetched} = useCategoryList(
-    limit,
-    selectedPage
-  )
+  const { data, isFetched, refetch } = useCategoryList(limit, selectedPage);
 
   return (
     <div
@@ -51,15 +56,18 @@ const MainCategoryScreen = () => {
           <div>
             <Input placeholder="Category Name" />
           </div>
-          <Button>
-            Add Route
-            <Image
-              src="/icons/plus-white.svg"
-              alt="Add Route"
-              width={10}
-              height={10}
-            />
-          </Button>
+          <Dialog>
+            <DialogTrigger>
+              <AddButton title="Add Category" />
+            </DialogTrigger>
+            <DialogContent className="max-w-[650px] max-h-[90%] overflow-scroll">
+              <DialogHeader>
+                <DialogTitle></DialogTitle>
+                <DialogDescription></DialogDescription>
+              </DialogHeader>
+              <AddCategoryForm refetch={refetch} />
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
       {/* main content */}
@@ -68,14 +76,10 @@ const MainCategoryScreen = () => {
           className="overflow-scroll pt-[24px] grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4"
           style={{ height: `${mainComponentHeight}px`, paddingBottom: "200px" }}
         >
-          {
-            isFetched &&
-            data?.data?.result?.map((category : Category)=>(
-              <CategoryBox
-              key={category._id}
-            title={category.bnName} />))
-          }
-          
+          {isFetched &&
+            data?.data?.result?.map((category: Category) => (
+              <CategoryBox key={category._id} title={category.bnName} />
+            ))}
         </div>
       </div>
       {/* footer content */}
