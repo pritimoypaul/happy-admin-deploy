@@ -7,7 +7,14 @@ import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
 import { AddFreelancerForm } from "./_addFreelancer";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const ManagementFreelancer = () => {
   const { height } = useWindowDimensions();
@@ -80,7 +87,7 @@ const ManagementFreelancer = () => {
           </div>
           <Dialog>
             <DialogTrigger>
-            <AddButton title="Add New" />
+              <AddButton title="Add New" />
             </DialogTrigger>
             <DialogContent className="max-w-[450px] max-h-[90%] overflow-scroll">
               <DialogHeader>
@@ -90,7 +97,6 @@ const ManagementFreelancer = () => {
               <AddFreelancerForm refetch={refetch} />
             </DialogContent>
           </Dialog>
-          
         </div>
       </div>
       {isFetching && (
@@ -107,7 +113,7 @@ const ManagementFreelancer = () => {
             <ProfileCard
               key={freelancer.freelancer._id}
               name={freelancer.freelancer.name}
-              details=""
+              details={freelancer.freelancer.phone}
               image={freelancer.freelancer.profileImg}
               url={`/admin/management/freelancer-profile/${freelancer.freelancer.id}`}
             />

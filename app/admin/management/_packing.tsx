@@ -1,13 +1,24 @@
 import ProfileCard from "@/components/core/profileCard";
+import { User } from "@/types/user";
+import { useUserList } from "@/utils/apis/getUser";
 import useWindowDimensions from "@/utils/windowSize";
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
 
 const ManagementPacking = () => {
   const { height } = useWindowDimensions();
   const [viewFormat, setViewFormat] = useState<string>("gridview");
+  const [limit] = useState(10);
+  const [selectedPage] = useState(1);
 
   const mainComponentHeight = height - 300;
+
+  const { data, isFetched, isFetching } = useUserList(
+    limit,
+    selectedPage,
+    "packingMan"
+  );
 
   return (
     <div
@@ -67,70 +78,25 @@ const ManagementPacking = () => {
           </div>
         </div>
       </div>
+      {isFetching && (
+        <div className="flex justify-center items-center pt-4">
+          <Loader2 className="animate-spin" />
+        </div>
+      )}
       <div
         className="overflow-scroll px-[24px] pt-[24px] grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4"
         style={{ height: `${mainComponentHeight}px`, paddingBottom: "200px" }}
       >
-        <ProfileCard
-          name="রমজান আলী"
-          details="Pran Food & Bavreage"
-          image="/images/man.png"
-          url="/admin/management/packing-man-profile"
-        />
-        <ProfileCard
-          name="রমজান আলী"
-          details="Pran Food & Bavreage"
-          image="/images/man.png"
-          url="/admin/management/packing-man-profile"
-        />
-        <ProfileCard
-          name="রমজান আলী"
-          details="Pran Food & Bavreage"
-          image="/images/man.png"
-          url="/admin/management/packing-man-profile"
-        />
-        <ProfileCard
-          name="রমজান আলী"
-          details="Pran Food & Bavreage"
-          image="/images/man.png"
-          url="/admin/management/packing-man-profile"
-        />
-        <ProfileCard
-          name="রমজান আলী"
-          details="Pran Food & Bavreage"
-          image="/images/man.png"
-          url="/admin/management/packing-man-profile"
-        />
-        <ProfileCard
-          name="রমজান আলী"
-          details="Pran Food & Bavreage"
-          image="/images/man.png"
-          url="/admin/management/packing-man-profile"
-        />
-        <ProfileCard
-          name="রমজান আলী"
-          details="Pran Food & Bavreage"
-          image="/images/man.png"
-          url="/admin/management/packing-man-profile"
-        />
-        <ProfileCard
-          name="রমজান আলী"
-          details="Pran Food & Bavreage"
-          image="/images/man.png"
-          url="/admin/management/packing-man-profile"
-        />
-        <ProfileCard
-          name="রমজান আলী"
-          details="Pran Food & Bavreage"
-          image="/images/man.png"
-          url="/admin/management/packing-man-profile"
-        />
-        <ProfileCard
-          name="রমজান আলী"
-          details="Pran Food & Bavreage"
-          image="/images/man.png"
-          url="/admin/management/packing-man-profile"
-        />
+        {isFetched &&
+          data?.data?.result.map((packingMan: User) => (
+            <ProfileCard
+              key={packingMan?._id}
+              name={packingMan?.name}
+              details={packingMan?.phone}
+              image={packingMan?.profileImg}
+              url="/admin/management/packing-man-profile"
+            />
+          ))}
       </div>
     </div>
   );
