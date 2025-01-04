@@ -132,7 +132,7 @@ const SrPage = () => {
                 name={sr?.sr?.name}
                 details={sr?.sr?.phone}
                 image={sr?.sr?.profileImg}
-                url="/admin/sr-profile"
+                url={`/admin/sr-profile/${sr?.sr?.id}`}
               />
             ))}
         </div>

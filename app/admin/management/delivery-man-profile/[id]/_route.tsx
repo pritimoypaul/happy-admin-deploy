@@ -5,16 +5,6 @@ import Image from "next/image";
 import React, { useState } from "react";
 
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -23,23 +13,20 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import RouteBox from "@/components/core/routeBox";
 import { AddRouteForm } from "./_addForm";
+import { useRouteList } from "@/utils/apis/getRouteList";
+import { RouteDetail } from "@/types/route";
 
-const DeliveryRouteScreen = () => {
+const DeliveryRouteScreen = ({ id }: any) => {
   const { height } = useWindowDimensions();
   const [tableTab, setTableTab] = useState("saturday");
+  const [limit] = useState(10);
+  const [selectedPage] = useState(1);
 
   const mainComponentHeight = height - 300;
+
+  const { data, isFetched } = useRouteList(id, limit, selectedPage);
 
   return (
     <div
@@ -126,70 +113,44 @@ const DeliveryRouteScreen = () => {
           className="overflow-scroll pt-[24px] grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4"
           style={{ height: `${mainComponentHeight}px`, paddingBottom: "200px" }}
         >
-          <RouteBox title="১ - বুধির হাট" distance={6} />
-          <RouteBox title="২ - কাশেমের মোড়" distance={6} />
-          <RouteBox title="২ - কাশেমের মোড়" distance={6} />
-          <RouteBox title="২ - কাশেমের মোড়" distance={6} />
-          <RouteBox title="২ - কাশেমের মোড়" distance={6} />
-          <RouteBox title="২ - কাশেমের মোড়" distance={6} />
-          <RouteBox title="২ - কাশেমের মোড়" distance={6} />
-          <RouteBox title="২ - কাশেমের মোড়" distance={6} />
-          <RouteBox title="২ - কাশেমের মোড়" distance={6} />
-          <RouteBox title="২ - কাশেমের মোড়" distance={6} />
-          <RouteBox title="২ - কাশেমের মোড়" distance={6} />
-          <RouteBox title="২ - কাশেমের মোড়" distance={6} />
-          <RouteBox title="২ - কাশেমের মোড়" distance={6} />
-          <RouteBox title="২ - কাশেমের মোড়" distance={6} />
-          <RouteBox title="২ - কাশেমের মোড়" distance={6} />
+          {tableTab == "saturday" &&
+            isFetched &&
+            data?.data?.saturday?.map((route: RouteDetail) => (
+              <RouteBox key={route?._id} title={route?.bnName} distance={6} />
+            ))}
+          {tableTab == "sunday" &&
+            isFetched &&
+            data?.data?.sunday?.map((route: RouteDetail) => (
+              <RouteBox key={route?._id} title={route?.bnName} distance={6} />
+            ))}
+          {tableTab == "monday" &&
+            isFetched &&
+            data?.data?.monday?.map((route: RouteDetail) => (
+              <RouteBox key={route?._id} title={route?.bnName} distance={6} />
+            ))}
+          {tableTab == "tuesday" &&
+            isFetched &&
+            data?.data?.tuesday?.map((route: RouteDetail) => (
+              <RouteBox key={route?._id} title={route?.bnName} distance={6} />
+            ))}
+          {tableTab == "wednesday" &&
+            isFetched &&
+            data?.data?.wednesday?.map((route: RouteDetail) => (
+              <RouteBox key={route?._id} title={route?.bnName} distance={6} />
+            ))}
+          {tableTab == "thursday" &&
+            isFetched &&
+            data?.data?.thursday?.map((route: RouteDetail) => (
+              <RouteBox key={route?._id} title={route?.bnName} distance={6} />
+            ))}
+          {tableTab == "friday" &&
+            isFetched &&
+            data?.data?.friday?.map((route: RouteDetail) => (
+              <RouteBox key={route?._id} title={route?.bnName} distance={6} />
+            ))}
         </div>
       </div>
       {/* footer content */}
-      <div className="bg-[#fff] px-[34px] py-[18px] flex justify-between items-center border-t-[1px] border-[#0472ED1F] absolute bottom-0 w-full">
-        <div className="text-[#718096] text-[14px] flex gap-2 items-center">
-          Show&nbsp;Result:
-          <Select defaultValue={"1"}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="1" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>1</SelectLabel>
-                <SelectItem value="1">1</SelectItem>
-                <SelectItem value="2">2</SelectItem>
-                <SelectItem value="3">3</SelectItem>
-                <SelectItem value="4">4</SelectItem>
-                <SelectItem value="5">5</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious href="#" />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href="#">1</PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href="#" isActive>
-                  2
-                </PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href="#">3</PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationEllipsis />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationNext href="#" />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      </div>
     </div>
   );
 };

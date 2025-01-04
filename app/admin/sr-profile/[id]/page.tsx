@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 
 import {
   DropdownMenu,
@@ -17,8 +17,9 @@ import SrRouteScreen from "./_route";
 import SrSummaryScreen from "./_summary";
 import SrOrderScreen from "./_order";
 
-const SrProfile = () => {
+const SrProfile = ({ params }: { params: Promise<{ id: string }> }) => {
   const [profileTab, setProfileTab] = useState("Overview");
+  const { id } = use(params);
 
   return (
     <div className="h-full">
@@ -177,7 +178,7 @@ const SrProfile = () => {
       {profileTab === "Order" && <SrOrderScreen />}
       {profileTab === "Dealer" && <SrDealer />}
       {profileTab === "Products" && <SrProducts />}
-      {profileTab === "Route" && <SrRouteScreen />}
+      {profileTab === "Route" && <SrRouteScreen srId={id} />}
       {profileTab === "Summary" && <SrSummaryScreen />}
     </div>
   );

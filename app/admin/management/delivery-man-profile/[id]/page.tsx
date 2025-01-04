@@ -1,14 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 
 import ProfileTab from "@/components/core/profileTab";
 import Image from "next/image";
 import DeliveryOrderScreen from "./_order";
 import DeliveryRouteScreen from "./_route";
 
-const ManagementDeliveryManProfile = () => {
+const ManagementDeliveryManProfile = ({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) => {
   const [profileTab, setProfileTab] = useState("Order");
+  const { id } = use(params);
 
   return (
     <div className="h-full">
@@ -60,7 +65,7 @@ const ManagementDeliveryManProfile = () => {
 
       {/* main element */}
       {profileTab === "Order" && <DeliveryOrderScreen />}
-      {profileTab === "Route" && <DeliveryRouteScreen />}
+      {profileTab === "Route" && <DeliveryRouteScreen id={id} />}
     </div>
   );
 };

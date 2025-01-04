@@ -94,7 +94,7 @@ const ManagementDelivery = () => {
               name={deliveryMan?.name}
               details={deliveryMan?.phone}
               image={deliveryMan?.profileImg}
-              url="/admin/management/delivery-man-profile"
+              url={`/admin/management/delivery-man-profile/${deliveryMan?.id}`}
             />
           ))}
       </div>
