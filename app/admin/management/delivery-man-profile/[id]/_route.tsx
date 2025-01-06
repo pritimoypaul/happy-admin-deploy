@@ -26,7 +26,7 @@ const DeliveryRouteScreen = ({ id }: any) => {
 
   const mainComponentHeight = height - 300;
 
-  const { data, isFetched } = useRouteList(id, limit, selectedPage);
+  const { data, isFetched, refetch } = useRouteList(id, limit, selectedPage);
 
   return (
     <div
@@ -102,7 +102,7 @@ const DeliveryRouteScreen = ({ id }: any) => {
                 <DialogTitle>Add New Route</DialogTitle>
                 <DialogDescription></DialogDescription>
               </DialogHeader>
-              <AddRouteForm />
+              <AddRouteForm id={id} refetch={refetch} />
             </DialogContent>
           </Dialog>
         </div>

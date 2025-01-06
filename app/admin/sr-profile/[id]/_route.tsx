@@ -6,6 +6,16 @@ import React, { useState } from "react";
 import RouteBox from "@/components/core/routeBox";
 import { useRouteList } from "@/utils/apis/getRouteList";
 import { RouteDetail } from "@/types/route";
+import { AddRouteForm } from "./_addForm";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const SrRouteScreen = ({ srId }: any) => {
   const { height } = useWindowDimensions();
@@ -16,7 +26,7 @@ const SrRouteScreen = ({ srId }: any) => {
   const [limit] = useState(10);
   const [selectedPage] = useState(1);
 
-  const { data, isFetched } = useRouteList(srId, limit, selectedPage);
+  const { data, isFetched, refetch } = useRouteList(srId, limit, selectedPage);
 
   return (
     <div
@@ -75,15 +85,26 @@ const SrRouteScreen = ({ srId }: any) => {
           </div>
         </div>
         <div>
-          <Button>
-            Add Route
-            <Image
-              src="/icons/plus-white.svg"
-              alt="Add Route"
-              width={10}
-              height={10}
-            />
-          </Button>
+          <Dialog>
+            <DialogTrigger>
+              <Button>
+                Add Route
+                <Image
+                  src="/icons/plus-white.svg"
+                  alt="Add Route"
+                  width={10}
+                  height={10}
+                />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-[450px] max-h-[90%] overflow-scroll">
+              <DialogHeader>
+                <DialogTitle>Add New Route</DialogTitle>
+                <DialogDescription></DialogDescription>
+              </DialogHeader>
+              <AddRouteForm id={srId} refetch={refetch} />
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
       {/* main content */}
