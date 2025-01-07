@@ -262,7 +262,7 @@ export function EditProductForm({ refetchData, editData }: any) {
                       <FormItem>
                         <FormLabel>Product Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="Muhammad Rasel" {...field} />
+                          <Input placeholder="Kitkat" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -277,7 +277,7 @@ export function EditProductForm({ refetchData, editData }: any) {
                       <FormItem>
                         <FormLabel>Product Name Bangla</FormLabel>
                         <FormControl>
-                          <Input placeholder="Muhammad Rasel" {...field} />
+                          <Input placeholder="Kitkat" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -361,6 +361,7 @@ export function EditProductForm({ refetchData, editData }: any) {
                               <SelectItem value="ডজন">ডজন</SelectItem>
                               <SelectItem value="পিস/পিচ">পিস/পিচ</SelectItem>
                               <SelectItem value="কেস">কেস</SelectItem>
+                              <SelectItem value="পলি">পলি</SelectItem>
                             </SelectContent>
                           </Select>
                         </FormControl>

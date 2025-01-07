@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/dialog";
 import { AddButton } from "@/components/core/addButton";
 import { AddCategoryForm } from "./_addCategoryForm";
+import { EditCategoryForm } from "./_editCategoryForm";
 
 const MainCategoryScreen = () => {
   const { height } = useWindowDimensions();
@@ -42,6 +43,7 @@ const MainCategoryScreen = () => {
 
   const [limit] = useState(10);
   const [selectedPage] = useState(1);
+  const [editData, setEditData] = useState({});
 
   const { data, isFetched, refetch } = useCategoryList(limit, selectedPage);
 
@@ -72,15 +74,32 @@ const MainCategoryScreen = () => {
       </div>
       {/* main content */}
       <div className="py-[20px] px-[34px]">
-        <div
-          className="overflow-scroll pt-[24px] grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4"
-          style={{ height: `${mainComponentHeight}px`, paddingBottom: "200px" }}
-        >
-          {isFetched &&
-            data?.data?.result?.map((category: Category) => (
-              <CategoryBox key={category._id} title={category.bnName} />
-            ))}
-        </div>
+        <Dialog>
+          <div
+            className="overflow-scroll pt-[24px] grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4"
+            style={{
+              height: `${mainComponentHeight}px`,
+              paddingBottom: "200px",
+            }}
+          >
+            {isFetched &&
+              data?.data?.result?.map((category: Category) => (
+                <DialogTrigger
+                  key={category._id}
+                  onClick={() => setEditData(category)}
+                >
+                  <CategoryBox title={category.bnName} />
+                </DialogTrigger>
+              ))}
+          </div>
+          <DialogContent className="max-w-[650px] max-h-[90%] overflow-scroll">
+            <DialogHeader>
+              <DialogTitle>Edit Product</DialogTitle>
+              <DialogDescription></DialogDescription>
+            </DialogHeader>
+            <EditCategoryForm refetchData={refetch} editData={editData} />
+          </DialogContent>
+        </Dialog>
       </div>
       {/* footer content */}
       <div className="bg-[#fff] px-[34px] py-[18px] flex justify-between items-center border-t-[1px] border-[#0472ED1F] absolute bottom-0 w-full">

@@ -255,7 +255,7 @@ export function AddProductForm({ refetchData }: any) {
                       <FormItem>
                         <FormLabel>Product Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="Muhammad Rasel" {...field} />
+                          <Input placeholder="Kitkat" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -270,7 +270,7 @@ export function AddProductForm({ refetchData }: any) {
                       <FormItem>
                         <FormLabel>Product Name Bangla</FormLabel>
                         <FormControl>
-                          <Input placeholder="Muhammad Rasel" {...field} />
+                          <Input placeholder="Kitkat" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -352,8 +352,9 @@ export function AddProductForm({ refetchData }: any) {
                               <SelectItem value="বক্স">বক্স</SelectItem>
                               <SelectItem value="কার্টুন">কার্টুন</SelectItem>
                               <SelectItem value="ডজন">ডজন</SelectItem>
-                              <SelectItem value="পিস/পিচ">পিস/পিচ</SelectItem>
+                              <SelectItem value="পিস">পিস</SelectItem>
                               <SelectItem value="কেস">কেস</SelectItem>
+                              <SelectItem value="পলি">পলি</SelectItem>
                             </SelectContent>
                           </Select>
                         </FormControl>
