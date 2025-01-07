@@ -3,7 +3,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 const axiosInstance = axios.create({
-  baseURL: "https://devapi.happybd.org/api/v1", // Replace with your backend URL
+  baseURL: "https://api.happybd.org/api/v1", // Replace with your backend URL
   headers: {
     "Content-Type": "application/json",
   },
@@ -55,7 +55,7 @@ axiosInstance.interceptors.response.use(
 
           // Call the refresh token API
           const response = await axios.get(
-            "https://devapi.happybd.org/api/v1/auth/access-token",
+            "https://api.happybd.org/api/v1/auth/access-token",
             {
               headers: {
                 Authorization: `Bearer ${oldToken}`,
