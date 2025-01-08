@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 
 import {
   DropdownMenu,
@@ -16,10 +16,35 @@ import SrProducts from "./_products";
 import SrRouteScreen from "./_route";
 import SrSummaryScreen from "./_summary";
 import SrOrderScreen from "./_order";
+import { useSrDetails } from "@/utils/apis/getSrDetails";
+import { Upazila } from "@/types/upazila";
+import SrCompany from "./_company";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { AssignUpazillaForm } from "./_srAssignUpazilla";
+import { AssignCompanyForm } from "./_srAssignCompany";
+import { AssignDealerForm } from "./_srAssignDealer";
 
 const SrProfile = ({ params }: { params: Promise<{ id: string }> }) => {
   const [profileTab, setProfileTab] = useState("Overview");
   const { id } = use(params);
+  const [isOpenUpazilla, setIsOpenUpazilla] = useState(false);
+  const [isOpenCompany, setIsOpenCompany] = useState(false);
+  const [isOpenDealer, setIsOpenDealer] = useState(false);
+
+  const { data, refetch } = useSrDetails(id);
+
+  useEffect(() => {
+    return () => {
+      document.body.style.pointerEvents = "";
+    };
+  }, [isOpenUpazilla, isOpenCompany, isOpenDealer]);
 
   return (
     <div className="h-full">
@@ -49,6 +74,45 @@ const SrProfile = ({ params }: { params: Promise<{ id: string }> }) => {
                   <p className="text-[14px] text-[#8A94A6]">Edit Profile</p>
                 </li>
 
+                <li
+                  className="mt-[10px] flex items-center gap-2"
+                  onClick={() => setIsOpenUpazilla(true)}
+                >
+                  <Image
+                    src="/icons/edit-icon.svg"
+                    height={10}
+                    width={10}
+                    alt="edit"
+                  />
+                  <p className="text-[14px] text-[#8A94A6]">Assign Upazilla</p>
+                </li>
+
+                <li
+                  className="mt-[10px] flex items-center gap-2"
+                  onClick={() => setIsOpenCompany(true)}
+                >
+                  <Image
+                    src="/icons/edit-icon.svg"
+                    height={10}
+                    width={10}
+                    alt="edit"
+                  />
+                  <p className="text-[14px] text-[#8A94A6]">Assign Company</p>
+                </li>
+
+                <li
+                  className="mt-[10px] flex items-center gap-2"
+                  onClick={() => setIsOpenDealer(true)}
+                >
+                  <Image
+                    src="/icons/edit-icon.svg"
+                    height={10}
+                    width={10}
+                    alt="edit"
+                  />
+                  <p className="text-[14px] text-[#8A94A6]">Assign Dealer</p>
+                </li>
+
                 <li className="mt-[10px] flex items-center gap-2">
                   <Image
                     src="/icons/delete-icon.svg"
@@ -62,11 +126,15 @@ const SrProfile = ({ params }: { params: Promise<{ id: string }> }) => {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <div className="p-[10px] w-2/3 flex justify-between items-center">
+        <div className="p-[10px] w-full flex justify-between items-center">
           <div className="flex items-center gap-5">
             <div className="h-[80px] w-[80px]">
               <Image
-                src="/images/man-large.png"
+                src={
+                  data?.data?.sr?.profileImg
+                    ? data?.data?.sr?.profileImg
+                    : "/images/man-large.png"
+                }
                 alt="Profile"
                 width={80}
                 height={80}
@@ -75,19 +143,25 @@ const SrProfile = ({ params }: { params: Promise<{ id: string }> }) => {
             </div>
             <div>
               <p className="text-[20px] font-medium text-[#222950]">
-                Mohammad Rasel
+                {data?.data?.sr?.name}
               </p>
-              <p className="text-[14px] text-[#8A94A6]">+880125 5566 5566</p>
+              <p className="text-[14px] text-[#8A94A6]">
+                {data?.data?.sr?.phone}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-5">
             <Image
-              src="/images/brand-logo.png"
+              src={
+                data?.data?.companies[0]?.image
+                  ? data?.data?.companies[0]?.image
+                  : "/images/brand-logo.png"
+              }
               width={37}
               height={25}
               alt="brand"
             />
-            <p>প্রাণ ফুডস লি:</p>
+            <p>{data?.data?.companies[0]?.bnName}</p>
           </div>
           <div className="flex items-center gap-5">
             <div className="p-[18px] rounded-md bg-[#F8FAFF]">
@@ -103,6 +177,18 @@ const SrProfile = ({ params }: { params: Promise<{ id: string }> }) => {
                 Join Date
               </p>
               <p className="text-[#8A94A6] text-[14px]">10 march 2023</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-5">
+            <div className="p-[18px] rounded-md bg-[#F8FAFF]">
+              <h1 className="text-[32px] text-[#BB3030] font-bold">U</h1>
+            </div>
+            <div>
+              <p className="font-medium text-[15px] text-[#222950]">
+                {data?.data?.upazilas?.map(
+                  (upazila: Upazila) => upazila?.name + ", "
+                )}
+              </p>
             </div>
           </div>
         </div>
@@ -157,6 +243,13 @@ const SrProfile = ({ params }: { params: Promise<{ id: string }> }) => {
             selected={profileTab === "Dealer"}
           />
         </button>
+        <button onClick={() => setProfileTab("Company")}>
+          <ProfileTab
+            image="/images/company-tab.png"
+            title="Company"
+            selected={profileTab === "Company"}
+          />
+        </button>
         <button onClick={() => setProfileTab("Summary")}>
           <ProfileTab
             image="/images/summary.png"
@@ -176,10 +269,39 @@ const SrProfile = ({ params }: { params: Promise<{ id: string }> }) => {
       {/* main element */}
       {profileTab === "Overview" && <SrOverview />}
       {profileTab === "Order" && <SrOrderScreen />}
-      {profileTab === "Dealer" && <SrDealer />}
+      {profileTab === "Dealer" && <SrDealer id={id} />}
+      {profileTab === "Company" && <SrCompany id={id} />}
       {profileTab === "Products" && <SrProducts />}
       {profileTab === "Route" && <SrRouteScreen srId={id} />}
       {profileTab === "Summary" && <SrSummaryScreen />}
+
+      <Dialog open={isOpenUpazilla} onOpenChange={setIsOpenUpazilla}>
+        <DialogContent className="max-w-[450px] max-h-[90%] overflow-scroll">
+          <DialogHeader>
+            <DialogTitle>Assign Upazila</DialogTitle>
+            <DialogDescription></DialogDescription>
+          </DialogHeader>
+          <AssignUpazillaForm id={id} refetch={refetch} />
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isOpenCompany} onOpenChange={setIsOpenCompany}>
+        <DialogContent className="max-w-[450px] max-h-[90%] overflow-scroll">
+          <DialogHeader>
+            <DialogTitle>Assign Company</DialogTitle>
+            <DialogDescription></DialogDescription>
+          </DialogHeader>
+          <AssignCompanyForm id={id} refetch={refetch} />
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isOpenDealer} onOpenChange={setIsOpenDealer}>
+        <DialogContent className="max-w-[450px] max-h-[90%] overflow-scroll">
+          <DialogHeader>
+            <DialogTitle>Assign Dealer</DialogTitle>
+            <DialogDescription></DialogDescription>
+          </DialogHeader>
+          <AssignDealerForm id={id} refetch={refetch} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

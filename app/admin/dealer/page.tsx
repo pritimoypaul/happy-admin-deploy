@@ -134,7 +134,7 @@ const Dealer = () => {
                   name={dealer?.dealer?.name}
                   details={dealer?.dealer?.phone}
                   image={dealer?.dealer?.profileImg}
-                  url="/admin/dealer-profile"
+                  url={`/admin/dealer-profile/${dealer?.dealer?.id}`}
                 />
               )
             )}

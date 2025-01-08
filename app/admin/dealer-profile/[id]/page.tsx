@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { use, useEffect, useState } from "react";
 
 import {
   DropdownMenu,
@@ -16,9 +16,30 @@ import DealerSummaryScreen from "./_summary";
 import DealerCompany from "./_company";
 import DealerSrScreen from "./_sr";
 import DealerProfitScreen from "./_profit";
+import { useDealerDetails } from "@/utils/apis/getDealerDetails";
 
-const DealerProfile = () => {
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { AssignCompanyForm } from "./_dealerAssignCompany";
+
+const DealerProfile = ({ params }: { params: Promise<{ id: string }> }) => {
   const [profileTab, setProfileTab] = useState("Summary");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const { id } = use(params);
+
+  const { data, refetch } = useDealerDetails(id);
+
+  useEffect(() => {
+    return () => {
+      document.body.style.pointerEvents = "";
+    };
+  }, [isOpen]);
 
   return (
     <div className="h-full">
@@ -50,6 +71,21 @@ const DealerProfile = () => {
                       <p className="text-[14px] text-[#8A94A6]">Edit Profile</p>
                     </li>
 
+                    <li
+                      className="mt-[10px] flex items-center gap-2"
+                      onClick={() => setIsOpen(true)}
+                    >
+                      <Image
+                        src="/icons/edit-icon.svg"
+                        height={10}
+                        width={10}
+                        alt="edit"
+                      />
+                      <p className="text-[14px] text-[#8A94A6]">
+                        Assign Company
+                      </p>
+                    </li>
+
                     <li className="mt-[10px] flex items-center gap-2">
                       <Image
                         src="/icons/delete-icon.svg"
@@ -76,10 +112,10 @@ const DealerProfile = () => {
                 </div>
                 <div>
                   <p className="text-[20px] font-medium text-[#222950]">
-                    Romjan Ali
+                    {data?.data?.dealer?.name}
                   </p>
                   <p className="text-[14px] text-[#8A94A6]">
-                    +880125 5566 5566
+                    {data?.data?.dealer?.phone}
                   </p>
                 </div>
               </div>
@@ -175,9 +211,19 @@ const DealerProfile = () => {
       {/* main element */}
       {profileTab === "Products" && <DealerProducts />}
       {profileTab === "Summary" && <DealerSummaryScreen />}
-      {profileTab === "Company" && <DealerCompany />}
+      {profileTab === "Company" && <DealerCompany id={id} />}
       {profileTab === "SR" && <DealerSrScreen />}
       {profileTab === "Profit" && <DealerProfitScreen />}
+
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="max-w-[450px] max-h-[90%] overflow-scroll">
+          <DialogHeader>
+            <DialogTitle>Assign Company</DialogTitle>
+            <DialogDescription></DialogDescription>
+          </DialogHeader>
+          <AssignCompanyForm id={id} refetch={refetch} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -1,11 +1,15 @@
 import CompanyCard from "@/components/core/companyCard";
+import { Company } from "@/types/company";
+import { useSrDetails } from "@/utils/apis/getSrDetails";
 import useWindowDimensions from "@/utils/windowSize";
 import Image from "next/image";
 import React, { useState } from "react";
 
-const DealerCompany = () => {
+const SrCompany = ({ id }: any) => {
   const { height } = useWindowDimensions();
   const [viewFormat, setViewFormat] = useState<string>("gridview");
+
+  const { data, isFetched } = useSrDetails(id);
 
   const mainComponentHeight = height - 300;
   return (
@@ -70,33 +74,19 @@ const DealerCompany = () => {
         className="overflow-scroll px-[24px] pt-[24px] grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4"
         style={{ height: `${mainComponentHeight}px`, paddingBottom: "200px" }}
       >
-        <CompanyCard
-          name="Pushti Limited"
-          details="pustilimited@happy.com"
-          image="/images/pushti.png"
-          url="/admin/sr-profile"
-        />
-        <CompanyCard
-          name="Pran Limited"
-          details="pranlimited@happy.com"
-          image="/images/pran-chanachur.png"
-          url="/admin/sr-profile"
-        />
-        <CompanyCard
-          name="Fresh Limited"
-          details="freshlimited@happy.com"
-          image="/images/fresh.png"
-          url="/admin/sr-profile"
-        />
-        <CompanyCard
-          name="VD Food"
-          details="bdfood@happy.com"
-          image="/images/bd-food.png"
-          url="/admin/sr-profile"
-        />
+        {isFetched &&
+          data?.data?.companies?.map((company: Company) => (
+            <CompanyCard
+              key={company._id}
+              name={company.name}
+              details=""
+              image={company.image}
+              url="/admin/dashboard"
+            />
+          ))}
       </div>
     </div>
   );
 };
 
-export default DealerCompany;
+export default SrCompany;
