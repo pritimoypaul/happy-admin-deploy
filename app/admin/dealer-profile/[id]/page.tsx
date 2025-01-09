@@ -103,7 +103,11 @@ const DealerProfile = ({ params }: { params: Promise<{ id: string }> }) => {
               <div className="flex items-center gap-5">
                 <div className="h-[80px] w-[80px]">
                   <Image
-                    src="/images/man-large.png"
+                    src={
+                      data?.data?.dealer?.profileImg
+                        ? data?.data?.dealer?.profileImg
+                        : "/images/man-large.png"
+                    }
                     alt="Profile"
                     width={80}
                     height={80}

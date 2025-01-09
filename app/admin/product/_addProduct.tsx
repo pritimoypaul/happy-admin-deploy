@@ -45,19 +45,19 @@ const FormSchema = z.object({
   category: z.string().min(2, {
     message: "Please provide a category",
   }),
-  piece: z.string().min(2, {
+  piece: z.string().min(1, {
     message: "Please provide peices",
   }),
   box_type: z.string().min(2, {
     message: "Please provide a box type",
   }),
-  rate: z.string().min(2, {
+  rate: z.string().min(1, {
     message: "Please provide rate.",
   }),
-  stock: z.string().min(2, {
+  stock: z.string().min(1, {
     message: "Please provide stock.",
   }),
-  profit_margin: z.string().min(2, {
+  profit_margin: z.string().min(1, {
     message: "Please provide profit margin.",
   }),
   dealer: z.string().min(2, {
@@ -66,7 +66,7 @@ const FormSchema = z.object({
   company: z.string().min(2, {
     message: "Please provide company.",
   }),
-  h_profit: z.string().min(2, {
+  h_profit: z.string().min(1, {
     message: "Please H profit.",
   }),
 });

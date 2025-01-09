@@ -45,7 +45,7 @@ const ProductCardEditable = ({
       <p className="text-[14px] text-[#8A94A6]">{details}</p>
       <div className="absolute bottom-[0px] w-full bg-[#FBFBFB] flex items-center justify-between px-[20px] rounded-b-[12px]">
         <span className="text-[#8A94A6] text-[14px] py-[7px] cursor-pointer">
-          {quantity} G
+          {quantity}
         </span>
         <span className="text-[#007AFF] text-[14px] py-[7px] cursor-pointer">
           Tk {price}
