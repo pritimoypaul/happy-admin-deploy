@@ -74,48 +74,56 @@ const SrProducts = () => {
           name="প্রান চানাচুর "
           details="Pran Foods"
           image="/images/pran-chanachur.png"
+          quantity={10}
+          price={100}
           url="/admin/sr-profile"
         />
         <ProductCard
           name="প্রান চানাচুর "
           details="Pran Foods"
           image="/images/pran-chanachur.png"
+          quantity={10}
+          price={100}
           url="/admin/sr-profile"
         />
         <ProductCard
           name="প্রান চানাচুর "
           details="Pran Foods"
           image="/images/pran-chanachur.png"
+          quantity={10}
+          price={100}
           url="/admin/sr-profile"
         />
         <ProductCard
           name="প্রান চানাচুর "
           details="Pran Foods"
           image="/images/pran-chanachur.png"
+          quantity={10}
+          price={100}
           url="/admin/sr-profile"
         />
         <ProductCard
           name="প্রান চানাচুর "
           details="Pran Foods"
           image="/images/pran-chanachur.png"
+          quantity={10}
+          price={100}
           url="/admin/sr-profile"
         />
         <ProductCard
           name="প্রান চানাচুর "
           details="Pran Foods"
           image="/images/pran-chanachur.png"
+          quantity={10}
+          price={100}
           url="/admin/sr-profile"
         />
         <ProductCard
           name="প্রান চানাচুর "
           details="Pran Foods"
           image="/images/pran-chanachur.png"
-          url="/admin/sr-profile"
-        />
-        <ProductCard
-          name="প্রান চানাচুর "
-          details="Pran Foods"
-          image="/images/pran-chanachur.png"
+          quantity={10}
+          price={100}
           url="/admin/sr-profile"
         />
       </div>
