@@ -1,13 +1,12 @@
 import useWindowDimensions from "@/utils/windowSize";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -15,7 +14,6 @@ import {
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -31,70 +29,31 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { IconInput } from "@/components/ui/inputIcon";
+import { useSrList } from "@/utils/apis/getSr";
+import { Sr } from "@/types/sr";
 
-const DealerSrScreen = () => {
+const DealerSrScreen = ({ dealerId }: any) => {
   const { height } = useWindowDimensions();
+  const [limit, setLimit] = useState(10);
+  const [selectedPage, setSelectedPage] = useState(1);
 
   const mainComponentHeight = height - 300;
 
-  const topProducts = [
-    {
-      sn: "01",
-      image: "",
-      name: "Mohammad Rasel",
-      phone: "+880 27383 637",
-      bazar: "Mirpur, Dhaka, Bangladesh",
-    },
-    {
-      sn: "02",
-      image: "",
-      name: "Mohammad Rasel",
-      phone: "+880 27383 637",
-      bazar: "Mirpur, Dhaka, Bangladesh",
-    },
-    {
-      sn: "03",
-      image: "",
-      name: "Mohammad Rasel",
-      phone: "+880 27383 637",
-      bazar: "Mirpur, Dhaka, Bangladesh",
-    },
-    {
-      sn: "04",
-      image: "",
-      name: "Mohammad Rasel",
-      phone: "+880 27383 637",
-      bazar: "Mirpur, Dhaka, Bangladesh",
-    },
-    {
-      sn: "05",
-      image: "",
-      name: "Mohammad Rasel",
-      phone: "+880 27383 637",
-      bazar: "Mirpur, Dhaka, Bangladesh",
-    },
-    {
-      sn: "06",
-      image: "",
-      name: "Mohammad Rasel",
-      phone: "+880 27383 637",
-      bazar: "Mirpur, Dhaka, Bangladesh",
-    },
-    {
-      sn: "07",
-      image: "",
-      name: "Mohammad Rasel",
-      phone: "+880 27383 637",
-      bazar: "Mirpur, Dhaka, Bangladesh",
-    },
-    {
-      sn: "08",
-      image: "",
-      name: "Mohammad Rasel",
-      phone: "+880 27383 637",
-      bazar: "Mirpur, Dhaka, Bangladesh",
-    },
-  ];
+  const { data, isFetched, refetch } = useSrList(limit, selectedPage, dealerId);
+
+  const paginate = (side: string) => {
+    if (side === "left") {
+      if (selectedPage == 1) return;
+      setSelectedPage(selectedPage - 1);
+    } else {
+      if (selectedPage == data?.data?.meta?.totalPage) return;
+      setSelectedPage(selectedPage + 1);
+    }
+  };
+
+  useEffect(() => {
+    refetch();
+  }, [limit, selectedPage]);
 
   return (
     <div
@@ -162,48 +121,55 @@ const DealerSrScreen = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {topProducts.map((product) => (
-                <TableRow key={product.sn} className="text-[#595F84]">
-                  <TableCell className="font-medium">{product.sn}</TableCell>
-                  <TableCell className="font-medium w-[300px]">
-                    <div className="flex gap-2 items-center">
-                      <Image
-                        src="/images/rasel.png"
-                        alt="pic"
-                        height={33}
-                        width={33}
-                        className="rounded-[100%]"
-                      />
+              {isFetched &&
+                data?.data?.result?.map((sr: Sr) => (
+                  <TableRow key={sr?._id} className="text-[#595F84]">
+                    <TableCell className="font-medium">{sr?.sr?.id}</TableCell>
+                    <TableCell className="font-medium w-[300px]">
+                      <div className="flex gap-2 items-center">
+                        <Image
+                          src={
+                            sr?.sr?.profileImg
+                              ? sr?.sr?.profileImg
+                              : "/images/rasel.png"
+                          }
+                          alt="pic"
+                          height={33}
+                          width={33}
+                          className="rounded-[100%]"
+                        />
 
-                      {product.name}
-                    </div>
-                  </TableCell>
-                  <TableCell>{product.phone}</TableCell>
-                  <TableCell className="text-center">{product.bazar}</TableCell>
+                        {sr?.sr?.name}
+                      </div>
+                    </TableCell>
+                    <TableCell>{sr?.sr?.phone}</TableCell>
+                    <TableCell className="text-center">
+                      {sr?.upazilas?.map((upazila) => upazila?.name) + ","}
+                    </TableCell>
 
-                  <TableCell className="text-center">
-                    <div className="w-full flex justify-center items-center gap-2">
-                      <Image
-                        src="/icons/edit-icon.svg"
-                        alt="icn"
-                        height={13}
-                        width={13}
-                      />
-                      <Image
-                        src="/icons/delete-icon.svg"
-                        alt="icn"
-                        height={13}
-                        width={13}
-                      />
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-center flex justify-center">
-                    <div className="cursor-pointer px-[20px] max-w-fit h-[40px] flex justify-center items-center gap-4 bg-[#EDF6FF] text-[#007AFF] rounded-[7px]">
-                      <span>View Product</span>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    <TableCell className="text-center">
+                      <div className="w-full flex justify-center items-center gap-2">
+                        <Image
+                          src="/icons/edit-icon.svg"
+                          alt="icn"
+                          height={13}
+                          width={13}
+                        />
+                        <Image
+                          src="/icons/delete-icon.svg"
+                          alt="icn"
+                          height={13}
+                          width={13}
+                        />
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center flex justify-center">
+                      <div className="cursor-pointer px-[20px] max-w-fit h-[40px] flex justify-center items-center gap-4 bg-[#EDF6FF] text-[#007AFF] rounded-[7px]">
+                        <span>View Product</span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </div>
@@ -212,19 +178,20 @@ const DealerSrScreen = () => {
       <div className="bg-[#fff] px-[34px] py-[18px] flex justify-between items-center border-t-[1px] border-[#0472ED1F] absolute bottom-0 w-full">
         <div className="text-[#718096] text-[14px] flex gap-2 items-center">
           Show&nbsp;Result:
-          <Select defaultValue={"1"}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="1" />
+          <Select
+            defaultValue={limit.toString()}
+            onValueChange={(value) => setLimit(Number(value))}
+          >
+            <SelectTrigger className="w-full" defaultValue={limit.toString()}>
+              <SelectValue placeholder="10" />
             </SelectTrigger>
             <SelectContent>
-              <SelectGroup>
-                <SelectLabel>1</SelectLabel>
-                <SelectItem value="1">1</SelectItem>
-                <SelectItem value="2">2</SelectItem>
-                <SelectItem value="3">3</SelectItem>
-                <SelectItem value="4">4</SelectItem>
-                <SelectItem value="5">5</SelectItem>
-              </SelectGroup>
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="6">6</SelectItem>
+              <SelectItem value="7">7</SelectItem>
+              <SelectItem value="8">8</SelectItem>
+              <SelectItem value="9">9</SelectItem>
+              <SelectItem value="10">10</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -232,24 +199,23 @@ const DealerSrScreen = () => {
           <Pagination>
             <PaginationContent>
               <PaginationItem>
-                <PaginationPrevious href="#" />
+                <PaginationPrevious href="#" onClick={() => paginate("left")} />
               </PaginationItem>
+              {isFetched &&
+                [...Array(data?.data?.meta?.totalPage)].map((_, index) => (
+                  <PaginationItem key={index}>
+                    <PaginationLink
+                      className="cursor-pointer"
+                      onClick={() => setSelectedPage(index + 1)}
+                      isActive={data?.data?.meta?.page == index + 1}
+                    >
+                      {index + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+
               <PaginationItem>
-                <PaginationLink href="#">1</PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href="#" isActive>
-                  2
-                </PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href="#">3</PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationEllipsis />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationNext href="#" />
+                <PaginationNext href="#" onClick={() => paginate("right")} />
               </PaginationItem>
             </PaginationContent>
           </Pagination>

@@ -1,13 +1,20 @@
 import ProductCard from "@/components/core/productCard";
+import { Product } from "@/types/product";
+import { useProductList } from "@/utils/apis/getProduct";
 import useWindowDimensions from "@/utils/windowSize";
 import Image from "next/image";
 import React, { useState } from "react";
 
-const DealerProducts = () => {
+const DealerProducts = ({ dealerId }: any) => {
   const { height } = useWindowDimensions();
   const [viewFormat, setViewFormat] = useState<string>("gridview");
+  const [limit] = useState(10);
+  const [selectedPage] = useState(1);
+
+  const { data, isFetched } = useProductList(limit, selectedPage, dealerId);
 
   const mainComponentHeight = height - 300;
+
   return (
     <div
       className="w-full overflow-hidden mt-[20px] bg-[#ffffff] rounded-[12px]"
@@ -70,54 +77,19 @@ const DealerProducts = () => {
         className="overflow-scroll px-[24px] pt-[24px] grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4"
         style={{ height: `${mainComponentHeight}px`, paddingBottom: "200px" }}
       >
-        <ProductCard
-          name="প্রান চানাচুর "
-          details="Pran Foods"
-          image="/images/pran-chanachur.png"
-          url="/admin/sr-profile"
-        />
-        <ProductCard
-          name="প্রান চানাচুর "
-          details="Pran Foods"
-          image="/images/pran-chanachur.png"
-          url="/admin/sr-profile"
-        />
-        <ProductCard
-          name="প্রান চানাচুর "
-          details="Pran Foods"
-          image="/images/pran-chanachur.png"
-          url="/admin/sr-profile"
-        />
-        <ProductCard
-          name="প্রান চানাচুর "
-          details="Pran Foods"
-          image="/images/pran-chanachur.png"
-          url="/admin/sr-profile"
-        />
-        <ProductCard
-          name="প্রান চানাচুর "
-          details="Pran Foods"
-          image="/images/pran-chanachur.png"
-          url="/admin/sr-profile"
-        />
-        <ProductCard
-          name="প্রান চানাচুর "
-          details="Pran Foods"
-          image="/images/pran-chanachur.png"
-          url="/admin/sr-profile"
-        />
-        <ProductCard
-          name="প্রান চানাচুর "
-          details="Pran Foods"
-          image="/images/pran-chanachur.png"
-          url="/admin/sr-profile"
-        />
-        <ProductCard
-          name="প্রান চানাচুর "
-          details="Pran Foods"
-          image="/images/pran-chanachur.png"
-          url="/admin/sr-profile"
-        />
+        {isFetched &&
+          data?.data?.result?.map((product: Product) => (
+            <div key={product._id}>
+              <ProductCard
+                name={product.bnName}
+                details={product.name}
+                image={product.image}
+                quantity={product.quantityPerPackage}
+                price={product.price}
+                url={`/admin/products/${product._id}`}
+              />
+            </div>
+          ))}
       </div>
     </div>
   );

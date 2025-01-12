@@ -2,11 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "../axios";
 import { buildUrl } from "../urlBuilder";
 
-async function getSr(limit: number, selectedPage: number) {
+async function getSr(limit: number, selectedPage: number, dealer?: string) {
   const url = buildUrl("/api/v1/sr", {
     limit: limit,
     page: selectedPage,
-    sort: '-_id',
+    sort: "-_id",
+    "dealers[]": dealer,
   });
   try {
     const response = await axiosInstance.get(url);
@@ -19,9 +20,10 @@ async function getSr(limit: number, selectedPage: number) {
 export const useSrList = (
   limit: number,
   selectedPage: number,
+  dealer?: string
 ) => {
   return useQuery({
     queryKey: ["sr-list"],
-    queryFn: () => getSr(limit, selectedPage),
+    queryFn: () => getSr(limit, selectedPage, dealer),
   });
 };

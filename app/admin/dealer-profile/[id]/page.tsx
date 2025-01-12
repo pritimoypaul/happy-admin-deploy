@@ -213,10 +213,16 @@ const DealerProfile = ({ params }: { params: Promise<{ id: string }> }) => {
       </div>
 
       {/* main element */}
-      {profileTab === "Products" && <DealerProducts />}
-      {profileTab === "Summary" && <DealerSummaryScreen />}
+      {profileTab === "Products" && (
+        <DealerProducts dealerId={data?.data?.dealer?._id} />
+      )}
+      {profileTab === "Summary" && (
+        <DealerSummaryScreen dealerId={data?.data?.dealer?._id} />
+      )}
       {profileTab === "Company" && <DealerCompany id={id} />}
-      {profileTab === "SR" && <DealerSrScreen />}
+      {profileTab === "SR" && (
+        <DealerSrScreen dealerId={data?.data?.dealer?._id} />
+      )}
       {profileTab === "Profit" && <DealerProfitScreen />}
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
