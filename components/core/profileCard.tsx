@@ -1,46 +1,36 @@
 import { balooda } from "@/utils/bengaliFont";
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 
-interface ProductCardProps {
+interface ProfileCardProps {
   name: string;
   details: string;
   image: string;
-  quantity: number;
-  price: number;
   url: string;
 }
 
-const ProductCard = ({
-  name,
-  details,
-  image,
-  quantity,
-  price,
-}: ProductCardProps) => {
+const ProfileCard = ({ name, details, image, url }: ProfileCardProps) => {
   return (
-    <div className="group bg-[#ffffff] w-full h-[238px] flex flex-col justify-center items-center py-[44px] rounded-[12px] relative hover:bg-[#ffffff] border-[1px] border-[#007AFF21] hover:border-[1px] hover:border-[#007AFF99]">
-      <div className="h-[98px] w-[98px] mb-[20px]">
+    <div className="group bg-[#F8FAFF] w-full h-[238px] flex flex-col justify-center items-center py-[44px] rounded-[12px] relative hover:bg-[#ffffff] hover:border-[1px] hover:border-[#007AFF99]">
+      <div className="h-[80px] w-[80px] mb-[20px]">
         <Image
           src={image}
           alt="user"
-          width={98}
-          height={98}
-          className="rounded-[12px] object-cover h-[98px] w-[98px] border-2 border-[#fff]"
+          width={80}
+          height={80}
+          className="rounded-[12px] object-cover h-[80px] w-[80px] border-2 border-[#fff]"
         />
       </div>
       <h3 className={`${balooda.className}`}>{name}</h3>
       <p className="text-[14px] text-[#8A94A6]">{details}</p>
-      <div className="absolute bottom-[0px] w-full bg-[#FBFBFB] flex items-center justify-between px-[20px] rounded-b-[12px]">
-        <span className="text-[#8A94A6] text-[14px] py-[7px] cursor-pointer">
-          {quantity}
-        </span>
+      <div className="absolute bottom-[0px] w-full bg-[#F8FAFF] hidden group-hover:flex items-center justify-center rounded-b-[12px]">
         <span className="text-[#007AFF] text-[14px] py-[7px] cursor-pointer">
-          Tk {price}
+          <Link href={url}>View Profile</Link>
         </span>
       </div>
     </div>
   );
 };
 
-export default ProductCard;
+export default ProfileCard;
