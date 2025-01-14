@@ -33,7 +33,7 @@ const MainProducts = () => {
   const [selectedPage] = useState(1);
   const [editData, setEditData] = useState({});
 
-  const { data, isFetched, refetch } = useProductList(limit, selectedPage);
+  const { data, isFetched, refetch } = useProductList({ limit, selectedPage });
 
   return (
     <div

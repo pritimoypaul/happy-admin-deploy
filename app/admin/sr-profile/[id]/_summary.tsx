@@ -2,7 +2,7 @@ import TableTabButton from "@/components/core/tableTabButton";
 import { Button } from "@/components/ui/button";
 import useWindowDimensions from "@/utils/windowSize";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { addDays, format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
@@ -19,9 +19,7 @@ import {
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -29,7 +27,6 @@ import {
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -45,91 +42,46 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import clsx from "clsx";
+import { useSummaryList } from "@/utils/apis/getSummary";
+import { formatDate } from "@/utils/formatDate";
 
-const SrSummaryScreen = () => {
+const SrSummaryScreen = ({ srId }: any) => {
   const { height } = useWindowDimensions();
   const [tableTab, setTableTab] = useState("summary");
+  const [limit, setLimit] = useState(10);
+  const [selectedPage, setSelectedPage] = useState(1);
   const [date, setDate] = React.useState<DateRange | undefined>({
-    from: new Date(2024, 0, 20),
-    to: addDays(new Date(2024, 0, 20), 20),
+    from: new Date(),
+    to: addDays(new Date(), 0),
   });
 
   const mainComponentHeight = height - 300;
 
-  const topProducts = [
-    {
-      name: "ডাল ভাজা - 11 গ্রাম (48)",
-      quantity: "5",
-      rate: "৳10.62",
-      total_retailer: "100",
-      sr_total: "৳60.62",
-      total: "৳1060.62",
-      oc: "+5",
-    },
-    {
-      name: "ডাল ভাজা - 12 গ্রাম (48)",
-      quantity: "5",
-      rate: "৳10.62",
-      total_retailer: "100",
-      sr_total: "৳60.62",
-      total: "৳1060.62",
-      oc: "+5",
-    },
-    {
-      name: "ডাল ভাজা - 13 গ্রাম (48)",
-      quantity: "5",
-      rate: "৳10.62",
-      total_retailer: "100",
-      sr_total: "৳60.62",
-      total: "৳1060.62",
-      oc: "+5",
-    },
-    {
-      name: "ডাল ভাজা - 14 গ্রাম (48)",
-      quantity: "5",
-      rate: "৳10.62",
-      total_retailer: "100",
-      sr_total: "৳60.62",
-      total: "৳1060.62",
-      oc: "-5",
-    },
-    {
-      name: "ডাল ভাজা - 15 গ্রাম (48)",
-      quantity: "5",
-      rate: "৳10.62",
-      total_retailer: "100",
-      sr_total: "৳60.62",
-      total: "৳1060.62",
-      oc: "-5",
-    },
-    {
-      name: "ডাল ভাজা - 16 গ্রাম (48)",
-      quantity: "5",
-      rate: "৳10.62",
-      total_retailer: "100",
-      sr_total: "৳60.62",
-      total: "৳1060.62",
-      oc: "+5",
-    },
-    {
-      name: "ডাল ভাজা - 17 গ্রাম (48)",
-      quantity: "5",
-      rate: "৳10.62",
-      total_retailer: "100",
-      sr_total: "৳60.62",
-      total: "৳1060.62",
-      oc: "+5",
-    },
-    {
-      name: "ডাল ভাজা - 18 গ্রাম (48)",
-      quantity: "5",
-      rate: "৳10.62",
-      total_retailer: "100",
-      sr_total: "৳60.62",
-      total: "৳1060.62",
-      oc: "+5",
-    },
-  ];
+  const { data, isFetched, refetch } = useSummaryList({
+    limit: limit,
+    selectedPage: selectedPage,
+    createdGte: formatDate(date?.from),
+    createdLte: formatDate(date?.to),
+    sr: srId,
+  });
+
+  const paginate = (side: string) => {
+    if (side === "left") {
+      if (selectedPage == 1) return;
+      setSelectedPage(selectedPage - 1);
+    } else {
+      if (selectedPage == data?.data?.meta?.totalPage) return;
+      setSelectedPage(selectedPage + 1);
+    }
+  };
+
+  useEffect(() => {
+    refetch();
+  }, [limit, selectedPage, formatDate(date?.from), formatDate(date?.to)]);
+
+  useEffect(() => {
+    console.log(`selected date: ${formatDate(date?.from)}`);
+  }, [date]);
 
   return (
     <div
@@ -234,30 +186,33 @@ const SrSummaryScreen = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {topProducts.map((product) => (
-                <TableRow key={product.name} className="text-[#595F84]">
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell className="font-medium">
-                    {product.quantity}
-                  </TableCell>
-                  <TableCell>{product.rate}</TableCell>
-                  <TableCell className="text-center">
-                    {product.total_retailer}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {product.sr_total}
-                  </TableCell>
-                  <TableCell className="text-right">{product.total}</TableCell>
-                  <TableCell
-                    className={clsx(`text-right`, {
-                      "text-[#0CAF60]": Number(product.oc) > 0,
-                      "text-[#FF565E]": Number(product.oc) < 0,
-                    })}
-                  >
-                    ৳{product.oc}
-                  </TableCell>
-                </TableRow>
-              ))}
+              {isFetched &&
+                data?.data?.map((product: any, index: number) => (
+                  <TableRow key={index} className="text-[#595F84]">
+                    <TableCell className="font-medium">
+                      {product?.productName}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {product?.totalQuantity}
+                    </TableCell>
+                    <TableCell>
+                      {product?.totalPrice?.toString().substring(0, 7)}
+                    </TableCell>
+                    <TableCell className="text-center">1</TableCell>
+                    <TableCell className="text-right">1</TableCell>
+                    <TableCell className="text-right">
+                      {product?.totalPrice?.toString().substring(0, 7)}
+                    </TableCell>
+                    <TableCell
+                      className={clsx(`text-right`, {
+                        "text-[#0CAF60]": Number(product?.totalOc) > 0,
+                        "text-[#FF565E]": Number(product?.totalOc) < 0,
+                      })}
+                    >
+                      ৳{product?.totalOc?.toString().substring(0, 7)}
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </div>
@@ -266,19 +221,20 @@ const SrSummaryScreen = () => {
       <div className="bg-[#fff] px-[34px] py-[18px] flex justify-between items-center border-t-[1px] border-[#0472ED1F] absolute bottom-0 w-full">
         <div className="text-[#718096] text-[14px] flex gap-2 items-center">
           Show&nbsp;Result:
-          <Select defaultValue={"1"}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="1" />
+          <Select
+            defaultValue={limit.toString()}
+            onValueChange={(value) => setLimit(Number(value))}
+          >
+            <SelectTrigger className="w-full" defaultValue={limit.toString()}>
+              <SelectValue placeholder="10" />
             </SelectTrigger>
             <SelectContent>
-              <SelectGroup>
-                <SelectLabel>1</SelectLabel>
-                <SelectItem value="1">1</SelectItem>
-                <SelectItem value="2">2</SelectItem>
-                <SelectItem value="3">3</SelectItem>
-                <SelectItem value="4">4</SelectItem>
-                <SelectItem value="5">5</SelectItem>
-              </SelectGroup>
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="6">6</SelectItem>
+              <SelectItem value="7">7</SelectItem>
+              <SelectItem value="8">8</SelectItem>
+              <SelectItem value="9">9</SelectItem>
+              <SelectItem value="10">10</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -286,24 +242,23 @@ const SrSummaryScreen = () => {
           <Pagination>
             <PaginationContent>
               <PaginationItem>
-                <PaginationPrevious href="#" />
+                <PaginationPrevious href="#" onClick={() => paginate("left")} />
               </PaginationItem>
+              {isFetched &&
+                [...Array(data?.data?.meta?.totalPage)].map((_, index) => (
+                  <PaginationItem key={index}>
+                    <PaginationLink
+                      className="cursor-pointer"
+                      onClick={() => setSelectedPage(index + 1)}
+                      isActive={data?.data?.meta?.page == index + 1}
+                    >
+                      {index + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+
               <PaginationItem>
-                <PaginationLink href="#">1</PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href="#" isActive>
-                  2
-                </PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href="#">3</PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationEllipsis />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationNext href="#" />
+                <PaginationNext href="#" onClick={() => paginate("right")} />
               </PaginationItem>
             </PaginationContent>
           </Pagination>

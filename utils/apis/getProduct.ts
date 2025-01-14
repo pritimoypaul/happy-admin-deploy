@@ -2,11 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "../axios";
 import { buildUrl } from "../urlBuilder";
 
-async function getProduct(limit: number, selectedPage: number, dealerId?: string, companyId?: string) {
+async function getProduct(limit: number, selectedPage: number, dealerId?: string, srId?: string, companyId?: string) {
   const url = buildUrl("/api/v1/products", {
     limit: limit,
     page: selectedPage,
     dealer: dealerId,
+    sr: srId,
     company: companyId,
   });
   try {
@@ -18,13 +19,22 @@ async function getProduct(limit: number, selectedPage: number, dealerId?: string
 }
 
 export const useProductList = (
+  {
+  limit,
+  selectedPage,
+  dealerId,
+  srId,
+  companyId
+  }:{
   limit: number,
   selectedPage: number,
   dealerId?: string,
+  srId?: string,
   companyId?: string
+  }
 ) => {
   return useQuery({
     queryKey: ["product-list"],
-    queryFn: () => getProduct(limit, selectedPage, dealerId, companyId),
+    queryFn: () => getProduct(limit, selectedPage, dealerId, srId, companyId),
   });
 };

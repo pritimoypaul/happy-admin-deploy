@@ -7,7 +7,8 @@ async function getSummary(
   selectedPage: number,
   createdGte?: string,
   createdLte?: string,
-  dealer?: string
+  dealer?: string,
+  sr?: string
 ) {
   const url = buildUrl("/api/v1/orders/summary/details", {
     limit: limit,
@@ -15,6 +16,7 @@ async function getSummary(
     "createdAt[gte]": createdGte,
     "createdAt[lte]": createdLte,
     dealer: dealer,
+    sr: sr,
   });
   try {
     const response = await axiosInstance.get(url);
@@ -25,15 +27,25 @@ async function getSummary(
 }
 
 export const useSummaryList = (
-  limit: number,
-  selectedPage: number,
-  createdGte?: string,
-  createdLte?: string,
-  dealer?: string
+  {
+    limit,
+    selectedPage,
+    createdGte,
+    createdLte,
+    dealer,
+    sr,
+  }: {
+    limit: number;
+    selectedPage: number;
+    createdGte?: string;
+    createdLte?: string;
+    dealer?: string;
+    sr?: string;
+  }
 ) => {
   return useQuery({
     queryKey: ["summary-list"],
     queryFn: () =>
-      getSummary(limit, selectedPage, createdGte, createdLte, dealer),
+      getSummary(limit, selectedPage, createdGte, createdLte, dealer, sr),
   });
 };

@@ -57,13 +57,13 @@ const DealerSummaryScreen = ({ dealerId }: any) => {
 
   const mainComponentHeight = height - 300;
 
-  const { data, isFetched, refetch } = useSummaryList(
-    limit,
-    selectedPage,
-    formatDate(date?.from),
-    formatDate(date?.to),
-    dealerId
-  );
+  const { data, isFetched, refetch } = useSummaryList({
+    limit: limit,
+    selectedPage: selectedPage,
+    createdGte: formatDate(date?.from),
+    createdLte: formatDate(date?.to),
+    dealer: dealerId,
+  });
 
   const paginate = (side: string) => {
     if (side === "left") {

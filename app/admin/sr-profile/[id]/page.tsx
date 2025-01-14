@@ -271,9 +271,11 @@ const SrProfile = ({ params }: { params: Promise<{ id: string }> }) => {
       {profileTab === "Order" && <SrOrderScreen />}
       {profileTab === "Dealer" && <SrDealer id={id} />}
       {profileTab === "Company" && <SrCompany id={id} />}
-      {profileTab === "Products" && <SrProducts />}
+      {profileTab === "Products" && <SrProducts srId={data?.data?.sr?._id} />}
       {profileTab === "Route" && <SrRouteScreen srId={id} />}
-      {profileTab === "Summary" && <SrSummaryScreen />}
+      {profileTab === "Summary" && (
+        <SrSummaryScreen srId={data?.data?.sr?._id} />
+      )}
 
       <Dialog open={isOpenUpazilla} onOpenChange={setIsOpenUpazilla}>
         <DialogContent className="max-w-[450px] max-h-[90%] overflow-scroll">

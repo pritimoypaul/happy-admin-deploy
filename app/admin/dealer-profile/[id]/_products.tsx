@@ -11,7 +11,11 @@ const DealerProducts = ({ dealerId }: any) => {
   const [limit] = useState(10);
   const [selectedPage] = useState(1);
 
-  const { data, isFetched } = useProductList(limit, selectedPage, dealerId);
+  const { data, isFetched } = useProductList({
+    limit,
+    selectedPage,
+    dealerId,
+  });
 
   const mainComponentHeight = height - 300;
 
