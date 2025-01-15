@@ -30,6 +30,7 @@ import {
 import { AssignUpazillaForm } from "./_srAssignUpazilla";
 import { AssignCompanyForm } from "./_srAssignCompany";
 import { AssignDealerForm } from "./_srAssignDealer";
+import { useSrOverview } from "@/utils/apis/getSrOverview";
 
 const SrProfile = ({ params }: { params: Promise<{ id: string }> }) => {
   const [profileTab, setProfileTab] = useState("Overview");
@@ -39,6 +40,7 @@ const SrProfile = ({ params }: { params: Promise<{ id: string }> }) => {
   const [isOpenDealer, setIsOpenDealer] = useState(false);
 
   const { data, refetch } = useSrDetails(id);
+  const { data: overviewData } = useSrOverview(id);
 
   useEffect(() => {
     return () => {
@@ -196,19 +198,27 @@ const SrProfile = ({ params }: { params: Promise<{ id: string }> }) => {
       <div className="border-b-[1px] border-l-[1px] border-r-[1px]  border-[#C9E2FF] w-full bg-[#fff] rounded-b-[12px] flex justify-between">
         <div className="w-full px-[64px] py-[32px] border-r-[1px] border-[#C9E2FF]">
           <p className="text-[12px] text-[#595F84]">TOTAL ORDER</p>
-          <p className="font-medium text-[16px] text-[#222950]">683</p>
+          <p className="font-medium text-[16px] text-[#222950]">
+            {overviewData?.data?.totalOrder ?? 0}
+          </p>
         </div>
         <div className="w-full px-[64px] py-[32px] border-r-[1px] border-[#C9E2FF]">
           <p className="text-[12px] text-[#595F84]">CANCELED</p>
-          <p className="font-medium text-[16px] text-[#222950]">400</p>
+          <p className="font-medium text-[16px] text-[#222950]">
+            {overviewData?.data?.cancelledOrder ?? 0}
+          </p>
         </div>
         <div className="w-full px-[64px] py-[32px] border-r-[1px] border-[#C9E2FF]">
           <p className="text-[12px] text-[#595F84]">Delivered</p>
-          <p className="font-medium text-[16px] text-[#222950]">855</p>
+          <p className="font-medium text-[16px] text-[#222950]">
+            {overviewData?.data?.deliveredOrder ?? 0}
+          </p>
         </div>
         <div className="w-full px-[64px] py-[32px]">
           <p className="text-[12px] text-[#595F84]">o/c</p>
-          <p className="font-medium text-[16px] text-[#FF8F6B]">-1.7k</p>
+          <p className="font-medium text-[16px] text-[#FF8F6B]">
+            {overviewData?.data?.totalOc ?? 0}
+          </p>
         </div>
       </div>
 

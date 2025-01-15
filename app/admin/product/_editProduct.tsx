@@ -94,14 +94,14 @@ export function EditProductForm({ refetchData, editData }: any) {
       image: undefined,
       product_name: editData?.name,
       product_name_bangla: editData?.bnName,
-      category: editData?.category,
+      category: editData?.category?._id,
       piece: editData?.quantityPerPackage.toString(),
       box_type: editData?.packageType,
       rate: editData?.price.toString(),
       stock: editData?.stock.toString(),
       profit_margin: editData?.ourCommission.toString(),
-      dealer: editData?.dealer,
-      company: editData?.company,
+      dealer: editData?.dealer?._id,
+      company: editData?.company?._id,
       h_profit: editData?.dealerCommission.toString(),
     },
   });
@@ -307,8 +307,8 @@ export function EditProductForm({ refetchData, editData }: any) {
                                 categoryData?.data?.result?.map(
                                   (category: Category) => (
                                     <SelectItem
-                                      key={category.id}
-                                      value={category.id}
+                                      key={category._id}
+                                      value={category._id}
                                     >
                                       {category.name}
                                     </SelectItem>
@@ -406,7 +406,7 @@ export function EditProductForm({ refetchData, editData }: any) {
                 <div className="flex-1">
                   <FormField
                     control={form.control}
-                    name="profit_margin"
+                    name="h_profit"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Profit Margin %</FormLabel>
@@ -440,8 +440,8 @@ export function EditProductForm({ refetchData, editData }: any) {
                               {dealerFetched &&
                                 dealerData?.data?.result?.map((dealer: any) => (
                                   <SelectItem
-                                    key={dealer?.dealer?.id}
-                                    value={dealer?.dealer?.id}
+                                    key={dealer?.dealer?._id}
+                                    value={dealer?.dealer?._id}
                                   >
                                     {dealer?.dealer.name}
                                   </SelectItem>
@@ -474,8 +474,8 @@ export function EditProductForm({ refetchData, editData }: any) {
                                 companyData?.data?.result?.map(
                                   (company: Company) => (
                                     <SelectItem
-                                      key={company.id}
-                                      value={company.id}
+                                      key={company._id}
+                                      value={company._id}
                                     >
                                       {company.name}
                                     </SelectItem>
@@ -495,7 +495,7 @@ export function EditProductForm({ refetchData, editData }: any) {
                 <div className="flex-1">
                   <FormField
                     control={form.control}
-                    name="h_profit"
+                    name="profit_margin"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>H profit Margin %</FormLabel>

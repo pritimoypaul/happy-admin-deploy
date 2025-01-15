@@ -399,7 +399,7 @@ export function AddProductForm({ refetchData }: any) {
                 <div className="flex-1">
                   <FormField
                     control={form.control}
-                    name="profit_margin"
+                    name="h_profit"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Profit Margin %</FormLabel>
@@ -488,7 +488,7 @@ export function AddProductForm({ refetchData }: any) {
                 <div className="flex-1">
                   <FormField
                     control={form.control}
-                    name="h_profit"
+                    name="profit_margin"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>H profit Margin %</FormLabel>
