@@ -54,7 +54,7 @@ const Retailer = () => {
   const { height } = useWindowDimensions();
   const [openEdit, setOpenEdit] = useState<boolean>(false);
   const [limit, setLimit] = useState(10);
-  const [selectedPage, setSelectedPage] = useState(1);
+  const [selectedPage, setSelectedPage] = useState<any>(1);
   const [selectedUpazila, setSelectedUpazila] = useState("");
   const [selectedUnion, setSelectedUnion] = useState("");
   const [selectedArea, setSelectedArea] = useState("");
@@ -335,17 +335,50 @@ const Retailer = () => {
                   />
                 </PaginationItem>
                 {isFetched &&
-                  [...Array(data?.data?.meta?.totalPage)].map((_, index) => (
-                    <PaginationItem key={index}>
-                      <PaginationLink
-                        className="cursor-pointer"
-                        onClick={() => setSelectedPage(index + 1)}
-                        isActive={data?.data?.meta?.page == index + 1}
-                      >
-                        {index + 1}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
+                  (() => {
+                    const totalPages = data?.data?.meta?.totalPage || 0;
+                    const currentPage = data?.data?.meta?.page || 1;
+
+                    // Helper function to determine if a page should be shown
+                    const shouldShowPage = (page: any) => {
+                      return (
+                        page === 1 || // Always show the first page
+                        page === totalPages || // Always show the last page
+                        (page >= currentPage - 1 && page <= currentPage + 1) // Show current page, one before, one after
+                      );
+                    };
+
+                    // Construct the pages array with ellipses
+                    const pages = [];
+                    for (let i = 1; i <= totalPages; i++) {
+                      if (shouldShowPage(i)) {
+                        pages.push(i);
+                      } else if (pages[pages.length - 1] !== "...") {
+                        pages.push("...");
+                      }
+                    }
+
+                    return (
+                      <div className="flex items-center">
+                        {/* Page Numbers */}
+                        {pages.map((page, idx) => (
+                          <PaginationItem key={idx}>
+                            {page === "..." ? (
+                              <span className="ellipsis">...</span>
+                            ) : (
+                              <PaginationLink
+                                className="cursor-pointer"
+                                onClick={() => setSelectedPage(page)}
+                                isActive={currentPage === page}
+                              >
+                                {page}
+                              </PaginationLink>
+                            )}
+                          </PaginationItem>
+                        ))}
+                      </div>
+                    );
+                  })()}
 
                 <PaginationItem>
                   <PaginationNext href="#" onClick={() => paginate("right")} />

@@ -278,7 +278,7 @@ const SrProfile = ({ params }: { params: Promise<{ id: string }> }) => {
 
       {/* main element */}
       {profileTab === "Overview" && <SrOverview />}
-      {profileTab === "Order" && <SrOrderScreen />}
+      {profileTab === "Order" && <SrOrderScreen srId={data?.data?.sr?._id} />}
       {profileTab === "Dealer" && <SrDealer id={id} />}
       {profileTab === "Company" && <SrCompany id={id} />}
       {profileTab === "Products" && <SrProducts srId={data?.data?.sr?._id} />}
