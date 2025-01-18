@@ -1,13 +1,12 @@
 import useWindowDimensions from "@/utils/windowSize";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -15,7 +14,6 @@ import {
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -31,70 +29,35 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { IconInput } from "@/components/ui/inputIcon";
+import { useOrderList } from "@/utils/apis/getOrder";
+import { Order } from "@/types/order";
 
-const DeliveryOrderScreen = () => {
+const DeliveryOrderScreen = ({ id }: any) => {
   const { height } = useWindowDimensions();
+  const [limit, setLimit] = useState(10);
+  const [selectedPage, setSelectedPage] = useState<any>(1);
 
   const mainComponentHeight = height - 300;
 
-  const topProducts = [
-    {
-      sn: "01",
-      image: "",
-      name: "Mohammad Rasel",
-      phone: "+880 27383 637",
-      bazar: "Mirpur, Dhaka, Bangladesh",
-    },
-    {
-      sn: "02",
-      image: "",
-      name: "Mohammad Rasel",
-      phone: "+880 27383 637",
-      bazar: "Mirpur, Dhaka, Bangladesh",
-    },
-    {
-      sn: "03",
-      image: "",
-      name: "Mohammad Rasel",
-      phone: "+880 27383 637",
-      bazar: "Mirpur, Dhaka, Bangladesh",
-    },
-    {
-      sn: "04",
-      image: "",
-      name: "Mohammad Rasel",
-      phone: "+880 27383 637",
-      bazar: "Mirpur, Dhaka, Bangladesh",
-    },
-    {
-      sn: "05",
-      image: "",
-      name: "Mohammad Rasel",
-      phone: "+880 27383 637",
-      bazar: "Mirpur, Dhaka, Bangladesh",
-    },
-    {
-      sn: "06",
-      image: "",
-      name: "Mohammad Rasel",
-      phone: "+880 27383 637",
-      bazar: "Mirpur, Dhaka, Bangladesh",
-    },
-    {
-      sn: "07",
-      image: "",
-      name: "Mohammad Rasel",
-      phone: "+880 27383 637",
-      bazar: "Mirpur, Dhaka, Bangladesh",
-    },
-    {
-      sn: "08",
-      image: "",
-      name: "Mohammad Rasel",
-      phone: "+880 27383 637",
-      bazar: "Mirpur, Dhaka, Bangladesh",
-    },
-  ];
+  const { data, isFetched, refetch } = useOrderList({
+    limit,
+    selectedPage,
+    dsr: id,
+  });
+
+  const paginate = (side: string) => {
+    if (side === "left") {
+      if (selectedPage == 1) return;
+      setSelectedPage(selectedPage - 1);
+    } else {
+      if (selectedPage == data?.data?.meta?.totalPage) return;
+      setSelectedPage(selectedPage + 1);
+    }
+  };
+
+  useEffect(() => {
+    refetch();
+  }, [limit, selectedPage]);
 
   return (
     <div
@@ -162,26 +125,35 @@ const DeliveryOrderScreen = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {topProducts.map((product) => (
-                <TableRow key={product.sn} className="text-[#595F84]">
-                  <TableCell className="font-medium">{product.sn}</TableCell>
-                  <TableCell className="font-medium w-[300px]">
-                    <div className="flex gap-2 items-center">
-                      <Image
-                        src="/images/rasel.png"
-                        alt="pic"
-                        height={33}
-                        width={33}
-                        className="rounded-[100%]"
-                      />
+              {isFetched &&
+                data?.data?.result?.map((order: Order) => (
+                  <TableRow key={order?._id} className="text-[#595F84]">
+                    <TableCell className="font-medium">
+                      {order?.retailer?.id}
+                    </TableCell>
+                    <TableCell className="font-medium w-[300px]">
+                      <div className="flex gap-2 items-center">
+                        <Image
+                          src={
+                            order?.retailer?.profileImg
+                              ? order?.retailer?.profileImg
+                              : "/images/man-large.png"
+                          }
+                          alt="pic"
+                          height={33}
+                          width={33}
+                          className="rounded-[100%]"
+                        />
 
-                      {product.name}
-                    </div>
-                  </TableCell>
-                  <TableCell>{product.phone}</TableCell>
-                  <TableCell className="text-center">{product.bazar}</TableCell>
+                        {order?.retailer?.name}
+                      </div>
+                    </TableCell>
+                    <TableCell>{order?.retailer?.name}</TableCell>
+                    <TableCell className="text-center">
+                      {order?.area?.bnName}
+                    </TableCell>
 
-                  {/* <TableCell className="text-center">
+                    {/* <TableCell className="text-center">
                     <div className="w-full flex justify-center items-center gap-2">
                       <Image
                         src="/icons/edit-icon.svg"
@@ -197,13 +169,13 @@ const DeliveryOrderScreen = () => {
                       />
                     </div>
                   </TableCell> */}
-                  {/* <TableCell className="text-center flex justify-center">
+                    {/* <TableCell className="text-center flex justify-center">
                     <div className="cursor-pointer px-[20px] max-w-fit h-[40px] flex justify-center items-center gap-4 bg-[#EDF6FF] text-[#007AFF] rounded-[7px]">
                       <span>View Product</span>
                     </div>
                   </TableCell> */}
-                </TableRow>
-              ))}
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </div>
@@ -212,19 +184,20 @@ const DeliveryOrderScreen = () => {
       <div className="bg-[#fff] px-[34px] py-[18px] flex justify-between items-center border-t-[1px] border-[#0472ED1F] absolute bottom-0 w-full">
         <div className="text-[#718096] text-[14px] flex gap-2 items-center">
           Show&nbsp;Result:
-          <Select defaultValue={"1"}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="1" />
+          <Select
+            defaultValue={limit.toString()}
+            onValueChange={(value) => setLimit(Number(value))}
+          >
+            <SelectTrigger className="w-full" defaultValue={limit.toString()}>
+              <SelectValue placeholder="10" />
             </SelectTrigger>
             <SelectContent>
-              <SelectGroup>
-                <SelectLabel>1</SelectLabel>
-                <SelectItem value="1">1</SelectItem>
-                <SelectItem value="2">2</SelectItem>
-                <SelectItem value="3">3</SelectItem>
-                <SelectItem value="4">4</SelectItem>
-                <SelectItem value="5">5</SelectItem>
-              </SelectGroup>
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="6">6</SelectItem>
+              <SelectItem value="7">7</SelectItem>
+              <SelectItem value="8">8</SelectItem>
+              <SelectItem value="9">9</SelectItem>
+              <SelectItem value="10">10</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -232,24 +205,56 @@ const DeliveryOrderScreen = () => {
           <Pagination>
             <PaginationContent>
               <PaginationItem>
-                <PaginationPrevious href="#" />
+                <PaginationPrevious href="#" onClick={() => paginate("left")} />
               </PaginationItem>
+              {isFetched &&
+                (() => {
+                  const totalPages = data?.data?.meta?.totalPage || 0;
+                  const currentPage = data?.data?.meta?.page || 1;
+
+                  // Helper function to determine if a page should be shown
+                  const shouldShowPage = (page: any) => {
+                    return (
+                      page === 1 || // Always show the first page
+                      page === totalPages || // Always show the last page
+                      (page >= currentPage - 1 && page <= currentPage + 1) // Show current page, one before, one after
+                    );
+                  };
+
+                  // Construct the pages array with ellipses
+                  const pages = [];
+                  for (let i = 1; i <= totalPages; i++) {
+                    if (shouldShowPage(i)) {
+                      pages.push(i);
+                    } else if (pages[pages.length - 1] !== "...") {
+                      pages.push("...");
+                    }
+                  }
+
+                  return (
+                    <div className="flex items-center">
+                      {/* Page Numbers */}
+                      {pages.map((page, idx) => (
+                        <PaginationItem key={idx}>
+                          {page === "..." ? (
+                            <span className="ellipsis">...</span>
+                          ) : (
+                            <PaginationLink
+                              className="cursor-pointer"
+                              onClick={() => setSelectedPage(page)}
+                              isActive={currentPage === page}
+                            >
+                              {page}
+                            </PaginationLink>
+                          )}
+                        </PaginationItem>
+                      ))}
+                    </div>
+                  );
+                })()}
+
               <PaginationItem>
-                <PaginationLink href="#">1</PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href="#" isActive>
-                  2
-                </PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href="#">3</PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationEllipsis />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationNext href="#" />
+                <PaginationNext href="#" onClick={() => paginate("right")} />
               </PaginationItem>
             </PaginationContent>
           </Pagination>

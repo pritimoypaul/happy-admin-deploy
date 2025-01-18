@@ -6,6 +6,7 @@ import ProfileTab from "@/components/core/profileTab";
 import Image from "next/image";
 import DeliveryOrderScreen from "./_order";
 import DeliveryRouteScreen from "./_route";
+import { useUserDetails } from "@/utils/apis/getUserDetails";
 
 const ManagementDeliveryManProfile = ({
   params,
@@ -14,6 +15,8 @@ const ManagementDeliveryManProfile = ({
 }) => {
   const [profileTab, setProfileTab] = useState("Order");
   const { id } = use(params);
+
+  const { data } = useUserDetails(id);
 
   return (
     <div className="h-full">
@@ -64,7 +67,7 @@ const ManagementDeliveryManProfile = ({
       </div>
 
       {/* main element */}
-      {profileTab === "Order" && <DeliveryOrderScreen />}
+      {profileTab === "Order" && <DeliveryOrderScreen id={data?.data?._id} />}
       {profileTab === "Route" && <DeliveryRouteScreen id={id} />}
     </div>
   );

@@ -260,7 +260,9 @@ const Retailer = () => {
                               width={33}
                               className="rounded-[100%]"
                             />
-                            <Link href="/admin/retailer-profile">
+                            <Link
+                              href={`/admin/retailer-profile/${retailer?.retailer?.id}`}
+                            >
                               {retailer?.retailer?.name}
                             </Link>
                           </div>

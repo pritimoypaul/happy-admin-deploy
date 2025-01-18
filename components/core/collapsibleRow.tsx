@@ -6,6 +6,7 @@ import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import clsx from "clsx";
 import Image from "next/image";
 import { Progress } from "../ui/progress";
+import moment from "moment";
 
 interface CollapsibleRowProps {
   product: any;
@@ -15,21 +16,25 @@ const CollapsibleRow = ({ product }: CollapsibleRowProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   return (
     <>
-      <TableRow key={product.orders} className="text-[#595F84]">
-        <TableCell className="font-medium">{product.date}</TableCell>
-        <TableCell>{product.retailer}</TableCell>
+      <TableRow key={product?._id} className="text-[#595F84]">
+        <TableCell className="font-medium">
+          {moment(product?.createdAt).format("LL")}
+        </TableCell>
+        <TableCell>{product?.sr?.name}</TableCell>
         <TableCell className="text-center">{product.qty}</TableCell>
-        <TableCell className="text-right">{product.amount}</TableCell>
+        <TableCell className="text-right">
+          {product.collectionAmount} ৳
+        </TableCell>
         <TableCell className="text-right">
           <div
             className={clsx(`text-right w-full flex justify-end float-right`, {
               "text-[#0CAF60] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
-                product.payment == "paid",
+                product?.paymentStatus == "paid",
               "text-[#EF3DF2] bg-[#FC6BFF1A] px-[14px] py-[4px] rounded-sm max-w-fit":
-                product.payment == "baki",
+                product?.paymentStatus == "Unpaid",
             })}
           >
-            {product.payment == "paid" ? "Paid" : "Baki"}
+            {product?.paymentStatus == "paid" ? "Paid" : "Baki"}
           </div>
         </TableCell>
         <TableCell className="text-right">
@@ -37,6 +42,8 @@ const CollapsibleRow = ({ product }: CollapsibleRowProps) => {
             className={clsx(`text-right w-full flex justify-end float-right`, {
               "text-[#0CAF60] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
                 product.status == "delivered",
+              "text-[#0aa75b] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
+                product.status == "Processing",
               "text-[#FD6A6A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
                 product.status == "cancelled",
               "text-[#FE964A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
@@ -47,6 +54,8 @@ const CollapsibleRow = ({ product }: CollapsibleRowProps) => {
               ? "Delivered"
               : product.status == "on_delivery"
               ? "On Delivery"
+              : product.status == "Processing"
+              ? "Processing"
               : "Cancelled"}
           </div>
         </TableCell>

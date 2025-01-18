@@ -62,10 +62,10 @@ const OrderScreen = () => {
     to: addDays(new Date(2024, 0, 20), 20),
   });
 
-  const { data, isFetching, isFetched, refetch } = useOrderList(
+  const { data, isFetching, isFetched, refetch } = useOrderList({
     limit,
-    selectedPage
-  );
+    selectedPage,
+  });
 
   const { data: retailerData } = useRetailerList(limit, selectedPage);
 

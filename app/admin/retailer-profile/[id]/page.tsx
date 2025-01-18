@@ -4,7 +4,7 @@ import TableTabButton from "@/components/core/tableTabButton";
 import { Button } from "@/components/ui/button";
 import useWindowDimensions from "@/utils/windowSize";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { use, useEffect, useState } from "react";
 
 import { addDays, format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
@@ -21,9 +21,7 @@ import {
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -31,7 +29,6 @@ import {
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -54,76 +51,54 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import CollapsibleRow from "@/components/core/collapsibleRow";
+import { useRetailerDetails } from "@/utils/apis/getRetailerDetails";
+import moment from "moment";
+import { useOrderList } from "@/utils/apis/getOrder";
+import { Order } from "@/types/order";
 
-const RetailerProfileScreen = () => {
+const RetailerProfileScreen = ({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) => {
   const { height } = useWindowDimensions();
   const [tableTab, setTableTab] = useState("all_order");
+  const [limit, setLimit] = useState(10);
+  const [selectedPage, setSelectedPage] = useState<any>(1);
   const [date, setDate] = React.useState<DateRange | undefined>({
     from: new Date(2024, 0, 20),
     to: addDays(new Date(2024, 0, 20), 20),
   });
 
+  const { id } = use(params);
+
+  const { data } = useRetailerDetails(id);
+
   const mainComponentHeight = height - 200;
 
-  const topProducts = [
-    {
-      orders: "SKN1100",
-      date: "April 24, 2022",
-      retailer: "Chieko Chute",
-      amount: "৳10.62",
-      qty: "৳10.62",
-      payment: "paid",
-      status: "cancelled",
-      cancel_reason: "Reason for cancellation",
-    },
-    {
-      orders: "SKN1200",
-      date: "April 24, 2022",
-      retailer: "Chieko Chute",
-      amount: "৳10.62",
-      qty: "৳10.62",
-      payment: "paid",
-      status: "delivered",
-      delivery_percentage: "20",
-    },
-    {
-      orders: "SKN1300",
-      date: "April 24, 2022",
-      retailer: "Chieko Chute",
-      amount: "৳10.62",
-      qty: "৳10.62",
-      payment: "paid",
-      status: "on_delivery",
-    },
-    {
-      orders: "SKN1400",
-      date: "April 24, 2022",
-      retailer: "Chieko Chute",
-      amount: "৳10.62",
-      qty: "৳10.62",
-      payment: "paid",
-      status: "cancelled",
-      cancel_reason: "Reason for cancellation",
-    },
-    {
-      orders: "SKN1500",
-      date: "April 24, 2022",
-      retailer: "Chieko Chute",
-      amount: "৳10.62",
-      qty: "৳10.62",
-      payment: "paid",
-      status: "delivered",
-    },
-    {
-      orders: "SKN1600",
-      date: "April 24, 2022",
-      retailer: "Chieko Chute",
-      amount: "৳10.62",
-      qty: "৳10.62",
-      payment: "baki",
-      status: "delivered",
-    },
-  ];
+  const {
+    data: orderData,
+    isFetched: orderFetched,
+    refetch: orderRefetch,
+  } = useOrderList({
+    limit,
+    selectedPage,
+    retailer: data?.data?.retailer?._id,
+  });
+
+  const paginate = (side: string) => {
+    if (side === "left") {
+      if (selectedPage == 1) return;
+      setSelectedPage(selectedPage - 1);
+    } else {
+      if (selectedPage == data?.data?.meta?.totalPage) return;
+      setSelectedPage(selectedPage + 1);
+    }
+  };
+
+  useEffect(() => {
+    orderRefetch();
+  }, [limit, selectedPage, data]);
 
   return (
     <div className="h-full">
@@ -170,7 +145,11 @@ const RetailerProfileScreen = () => {
           <div className="flex items-center gap-5">
             <div className="h-[80px] w-[80px]">
               <Image
-                src="/images/man-large.png"
+                src={
+                  data?.data?.retailer?.profileImg
+                    ? data?.data?.retailer?.profileImg
+                    : "/images/man-large.png"
+                }
                 alt="Profile"
                 width={80}
                 height={80}
@@ -179,9 +158,11 @@ const RetailerProfileScreen = () => {
             </div>
             <div>
               <p className="text-[20px] font-medium text-[#222950]">
-                Mohammad Rasel
+                {data?.data?.retailer?.name}
               </p>
-              <p className="text-[14px] text-[#8A94A6]">+880125 5566 5566</p>
+              <p className="text-[14px] text-[#8A94A6]">
+                {data?.data?.retailer?.phone}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-5">
@@ -195,7 +176,9 @@ const RetailerProfileScreen = () => {
             </div>
             <div>
               <p className="font-medium text-[15px] text-[#222950]">Phone</p>
-              <p className="text-[#8A94A6] text-[14px]">+880125 5566 55</p>
+              <p className="text-[#8A94A6] text-[14px]">
+                {data?.data?.retailer?.phone}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-5">
@@ -211,7 +194,9 @@ const RetailerProfileScreen = () => {
               <p className="font-medium text-[15px] text-[#222950]">
                 Join Date
               </p>
-              <p className="text-[#8A94A6] text-[14px]">10 march 2023</p>
+              <p className="text-[#8A94A6] text-[14px]">
+                {moment(data?.data?.retailer?.createdAt).format("LL")}
+              </p>
             </div>
           </div>
         </div>
@@ -341,9 +326,10 @@ const RetailerProfileScreen = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {topProducts.map((product) => (
-                  <CollapsibleRow key={product.orders} product={product} />
-                ))}
+                {orderFetched &&
+                  orderData?.data?.result?.map((order: Order) => (
+                    <CollapsibleRow key={order?._id} product={order} />
+                  ))}
               </TableBody>
               <br />
               <br />
@@ -370,19 +356,20 @@ const RetailerProfileScreen = () => {
         <div className="bg-[#fff] px-[34px] py-[18px] flex justify-between items-center border-t-[1px] border-[#0472ED1F] absolute bottom-0 w-full">
           <div className="text-[#718096] text-[14px] flex gap-2 items-center">
             Show&nbsp;Result:
-            <Select defaultValue={"1"}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="1" />
+            <Select
+              defaultValue={limit.toString()}
+              onValueChange={(value) => setLimit(Number(value))}
+            >
+              <SelectTrigger className="w-full" defaultValue={limit.toString()}>
+                <SelectValue placeholder="10" />
               </SelectTrigger>
               <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>1</SelectLabel>
-                  <SelectItem value="1">1</SelectItem>
-                  <SelectItem value="2">2</SelectItem>
-                  <SelectItem value="3">3</SelectItem>
-                  <SelectItem value="4">4</SelectItem>
-                  <SelectItem value="5">5</SelectItem>
-                </SelectGroup>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="6">6</SelectItem>
+                <SelectItem value="7">7</SelectItem>
+                <SelectItem value="8">8</SelectItem>
+                <SelectItem value="9">9</SelectItem>
+                <SelectItem value="10">10</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -390,24 +377,59 @@ const RetailerProfileScreen = () => {
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
-                  <PaginationPrevious href="#" />
+                  <PaginationPrevious
+                    href="#"
+                    onClick={() => paginate("left")}
+                  />
                 </PaginationItem>
+                {orderFetched &&
+                  (() => {
+                    const totalPages = data?.data?.meta?.totalPage || 0;
+                    const currentPage = data?.data?.meta?.page || 1;
+
+                    // Helper function to determine if a page should be shown
+                    const shouldShowPage = (page: any) => {
+                      return (
+                        page === 1 || // Always show the first page
+                        page === totalPages || // Always show the last page
+                        (page >= currentPage - 1 && page <= currentPage + 1) // Show current page, one before, one after
+                      );
+                    };
+
+                    // Construct the pages array with ellipses
+                    const pages = [];
+                    for (let i = 1; i <= totalPages; i++) {
+                      if (shouldShowPage(i)) {
+                        pages.push(i);
+                      } else if (pages[pages.length - 1] !== "...") {
+                        pages.push("...");
+                      }
+                    }
+
+                    return (
+                      <div className="flex items-center">
+                        {/* Page Numbers */}
+                        {pages.map((page, idx) => (
+                          <PaginationItem key={idx}>
+                            {page === "..." ? (
+                              <span className="ellipsis">...</span>
+                            ) : (
+                              <PaginationLink
+                                className="cursor-pointer"
+                                onClick={() => setSelectedPage(page)}
+                                isActive={currentPage === page}
+                              >
+                                {page}
+                              </PaginationLink>
+                            )}
+                          </PaginationItem>
+                        ))}
+                      </div>
+                    );
+                  })()}
+
                 <PaginationItem>
-                  <PaginationLink href="#">1</PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink href="#" isActive>
-                    2
-                  </PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink href="#">3</PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationNext href="#" />
+                  <PaginationNext href="#" onClick={() => paginate("right")} />
                 </PaginationItem>
               </PaginationContent>
             </Pagination>

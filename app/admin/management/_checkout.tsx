@@ -1,4 +1,6 @@
 import ProfileCard from "@/components/core/profileCard";
+import { User } from "@/types/user";
+import { useUserList } from "@/utils/apis/getUser";
 import useWindowDimensions from "@/utils/windowSize";
 import Image from "next/image";
 import React, { useState } from "react";
@@ -6,8 +8,12 @@ import React, { useState } from "react";
 const ManagementCheckout = () => {
   const { height } = useWindowDimensions();
   const [viewFormat, setViewFormat] = useState<string>("gridview");
+  const [limit] = useState(10);
+  const [selectedPage] = useState(1);
 
   const mainComponentHeight = height - 300;
+
+  const { data, isFetched } = useUserList(limit, selectedPage, "checkingMan");
 
   return (
     <div
@@ -71,66 +77,16 @@ const ManagementCheckout = () => {
         className="overflow-scroll px-[24px] pt-[24px] grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4"
         style={{ height: `${mainComponentHeight}px`, paddingBottom: "200px" }}
       >
-        <ProfileCard
-          name="রমজান আলী"
-          details="Pran Food & Bavreage"
-          image="/images/man.png"
-          url="/admin/management/checkout-man-profile"
-        />
-        <ProfileCard
-          name="রমজান আলী"
-          details="Pran Food & Bavreage"
-          image="/images/man.png"
-          url="/admin/management/checkout-man-profile"
-        />
-        <ProfileCard
-          name="রমজান আলী"
-          details="Pran Food & Bavreage"
-          image="/images/man.png"
-          url="/admin/management/checkout-man-profile"
-        />
-        <ProfileCard
-          name="রমজান আলী"
-          details="Pran Food & Bavreage"
-          image="/images/man.png"
-          url="/admin/management/checkout-man-profile"
-        />
-        <ProfileCard
-          name="রমজান আলী"
-          details="Pran Food & Bavreage"
-          image="/images/man.png"
-          url="/admin/management/checkout-man-profile"
-        />
-        <ProfileCard
-          name="রমজান আলী"
-          details="Pran Food & Bavreage"
-          image="/images/man.png"
-          url="/admin/management/checkout-man-profile"
-        />
-        <ProfileCard
-          name="রমজান আলী"
-          details="Pran Food & Bavreage"
-          image="/images/man.png"
-          url="/admin/management/checkout-man-profile"
-        />
-        <ProfileCard
-          name="রমজান আলী"
-          details="Pran Food & Bavreage"
-          image="/images/man.png"
-          url="/admin/management/checkout-man-profile"
-        />
-        <ProfileCard
-          name="রমজান আলী"
-          details="Pran Food & Bavreage"
-          image="/images/man.png"
-          url="/admin/management/checkout-man-profile"
-        />
-        <ProfileCard
-          name="রমজান আলী"
-          details="Pran Food & Bavreage"
-          image="/images/man.png"
-          url="/admin/management/checkout-man-profile"
-        />
+        {isFetched &&
+          data?.data?.result.map((checkingMan: User) => (
+            <ProfileCard
+              key={checkingMan?._id}
+              name={checkingMan?.name}
+              details={checkingMan?.phone}
+              image={checkingMan?.profileImg}
+              url={`/admin/management/checkout-man-profile/${checkingMan?.id}`}
+            />
+          ))}
       </div>
     </div>
   );
