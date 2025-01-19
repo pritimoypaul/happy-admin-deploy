@@ -5,7 +5,6 @@ import React, { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -23,19 +22,35 @@ import {
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { IconInput } from "@/components/ui/inputIcon";
 import { useOrderList } from "@/utils/apis/getOrder";
 import { Order } from "@/types/order";
+import { DateRange } from "react-day-picker";
+import { addDays, format } from "date-fns";
+import TableTabButton from "@/components/core/tableTabButton";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import CollapsibleRow from "@/components/core/collapsibleRow";
 
 const DeliveryOrderScreen = ({ id }: any) => {
   const { height } = useWindowDimensions();
   const [limit, setLimit] = useState(10);
+  const [tableTab, setTableTab] = useState("all_order");
   const [selectedPage, setSelectedPage] = useState<any>(1);
+  const [date, setDate] = React.useState<DateRange | undefined>({
+    from: new Date(2024, 0, 20),
+    to: addDays(new Date(2024, 0, 20), 20),
+  });
 
   const mainComponentHeight = height - 300;
 
@@ -62,125 +77,137 @@ const DeliveryOrderScreen = ({ id }: any) => {
   return (
     <div
       className="w-full overflow-hidden mt-[30px] bg-[#ffffff] rounded-[12px] relative"
-      style={{ height: `${mainComponentHeight}px`, paddingBottom: "50px" }}
+      style={{ height: `${mainComponentHeight}px`, paddingBottom: "100px" }}
     >
       <div className="px-[34px] py-[18px] flex justify-between items-center border-b-[1px] border-[#0472ED1F]">
         <div>
           <div>
-            <p className="text-[24px] text-[#222950] font-bold">All Orders</p>
+            <ul className="flex items-center gap-[40px]">
+              <button onClick={() => setTableTab("all_order")}>
+                <TableTabButton
+                  selected={tableTab === "all_order"}
+                  title="All Order"
+                />
+              </button>
+
+              <button onClick={() => setTableTab("delivered")}>
+                <TableTabButton
+                  selected={tableTab === "delivered"}
+                  title="Delivered"
+                />
+              </button>
+
+              <button onClick={() => setTableTab("cancelled")}>
+                <TableTabButton
+                  selected={tableTab === "cancelled"}
+                  title="Cancelled"
+                />
+              </button>
+
+              <button onClick={() => setTableTab("damage")}>
+                <p className="text-[14px] text-[#FF565E] font-medium underline underline-offset-4">
+                  Damage
+                </p>
+              </button>
+            </ul>
           </div>
         </div>
         <div className="flex gap-4 items-center">
-          <Select defaultValue="">
-            <SelectTrigger className="w-[100px]">
-              <SelectValue placeholder="Upazillla" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="Upazilla">Upazilla</SelectItem>
-                <SelectItem value="Zilla">Zilla</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-
-          <Select defaultValue="">
-            <SelectTrigger className="w-[100px]">
-              <SelectValue placeholder="Union" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="Union">Union</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-
-          <Select defaultValue="">
-            <SelectTrigger className="w-[100px]">
-              <SelectValue placeholder="Bazar" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="Bazar">Bazar</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <IconInput icon="/icons/search.svg" placeholder="Search SR" />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                id="date"
+                variant={"outline"}
+                className={cn(
+                  "w-[300px] justify-start text-left font-normal",
+                  !date && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon />
+                {date?.from ? (
+                  date.to ? (
+                    <>
+                      {format(date.from, "LLL dd, y")} -{" "}
+                      {format(date.to, "LLL dd, y")}
+                    </>
+                  ) : (
+                    format(date.from, "LLL dd, y")
+                  )
+                ) : (
+                  <span>Pick a date</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                initialFocus
+                mode="range"
+                defaultMonth={date?.from}
+                selected={date}
+                onSelect={setDate}
+                numberOfMonths={2}
+              />
+            </PopoverContent>
+          </Popover>
+          <button className="p-[13px] rounded-[7px] border-[1px] border-[#E2E8F0]">
+            <Image
+              src="/icons/download.svg"
+              alt="download"
+              height={15}
+              width={15}
+            />
+          </button>
         </div>
       </div>
       {/* main content */}
       <div className="py-[20px] px-[34px]">
         <div
           className="mt-[22px] overflow-scroll"
-          style={{ height: `${mainComponentHeight}px`, paddingBottom: "200px" }}
+          style={{
+            height: `${mainComponentHeight}px`,
+            paddingBottom: "200px",
+          }}
         >
           <Table>
             <TableHeader>
               <TableRow className="text-[#595F84]">
-                <TableHead className="">SN.</TableHead>
-                <TableHead className="w-[200px]">NAME</TableHead>
-                <TableHead>PHONE NUMBER</TableHead>
-                <TableHead className="text-center">BAZAR</TableHead>
-                {/* <TableHead className="text-right w-[50px]">ACTION</TableHead>
-                <TableHead className="text-right"></TableHead> */}
+                <TableHead className="w-[200px]">Date</TableHead>
+                <TableHead>Sr</TableHead>
+                <TableHead className="text-center">Total Items</TableHead>
+                <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="text-right">Payment</TableHead>
+                <TableHead className="text-right">Status</TableHead>
+                <TableHead className="text-right w-[200px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isFetched &&
                 data?.data?.result?.map((order: Order) => (
-                  <TableRow key={order?._id} className="text-[#595F84]">
-                    <TableCell className="font-medium">
-                      {order?.retailer?.id}
-                    </TableCell>
-                    <TableCell className="font-medium w-[300px]">
-                      <div className="flex gap-2 items-center">
-                        <Image
-                          src={
-                            order?.retailer?.profileImg
-                              ? order?.retailer?.profileImg
-                              : "/images/man-large.png"
-                          }
-                          alt="pic"
-                          height={33}
-                          width={33}
-                          className="rounded-[100%]"
-                        />
-
-                        {order?.retailer?.name}
-                      </div>
-                    </TableCell>
-                    <TableCell>{order?.retailer?.name}</TableCell>
-                    <TableCell className="text-center">
-                      {order?.area?.bnName}
-                    </TableCell>
-
-                    {/* <TableCell className="text-center">
-                    <div className="w-full flex justify-center items-center gap-2">
-                      <Image
-                        src="/icons/edit-icon.svg"
-                        alt="icn"
-                        height={13}
-                        width={13}
-                      />
-                      <Image
-                        src="/icons/delete-icon.svg"
-                        alt="icn"
-                        height={13}
-                        width={13}
-                      />
-                    </div>
-                  </TableCell> */}
-                    {/* <TableCell className="text-center flex justify-center">
-                    <div className="cursor-pointer px-[20px] max-w-fit h-[40px] flex justify-center items-center gap-4 bg-[#EDF6FF] text-[#007AFF] rounded-[7px]">
-                      <span>View Product</span>
-                    </div>
-                  </TableCell> */}
-                  </TableRow>
+                  <CollapsibleRow key={order?._id} product={order} />
                 ))}
             </TableBody>
+            <br />
+            <br />
+            <br />
+            <br />
           </Table>
         </div>
       </div>
+
       {/* footer content */}
+      <div className="bg-[#fff] px-[34px] py-[18px] flex justify-between items-center border-t-[1px] border-[#0472ED1F] absolute bottom-[75px] w-full text-[#718096] text-[14px]">
+        <div className="flex items-center gap-4">
+          <div>Total Order: 06</div>
+          <div>|</div>
+          <div>O/C: 500,00</div>
+          <div>|</div>
+          <div className="text-[#FD6A6A]">Cancel Amount: 500,00</div>
+          <div>|</div>
+        </div>
+        <div>
+          <div>Total Amount: 500,00</div>
+        </div>
+      </div>
       <div className="bg-[#fff] px-[34px] py-[18px] flex justify-between items-center border-t-[1px] border-[#0472ED1F] absolute bottom-0 w-full">
         <div className="text-[#718096] text-[14px] flex gap-2 items-center">
           Show&nbsp;Result:
