@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "../axios";
-import { buildUrl } from "../urlBuilder";
+import { buildUrlMultiValue } from "../urlBuilder";
 
 async function getProduct(limit: number, selectedPage: number, dealerId?: string, srId?: string, companyId?: string) {
-  const url = buildUrl("/api/v1/products", {
+  const url = buildUrlMultiValue("/api/v1/products", {
     limit: limit,
     page: selectedPage,
     dealer: dealerId,

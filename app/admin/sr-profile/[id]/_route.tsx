@@ -16,6 +16,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useSrDayList } from "@/utils/apis/getSrDay";
+import { formatDate } from "@/utils/formatDate";
+import { getDayname } from "@/utils/getDayName";
 
 const SrRouteScreen = ({ srId }: any) => {
   const { height } = useWindowDimensions();
@@ -26,7 +29,15 @@ const SrRouteScreen = ({ srId }: any) => {
   const [limit] = useState(10);
   const [selectedPage] = useState(1);
 
+  const date = formatDate(new Date());
+
   const { data, isFetched, refetch } = useRouteList(srId, limit, selectedPage);
+  const { data: dayData, isFetched: dayDataFetched } = useSrDayList(
+    srId,
+    date,
+    limit,
+    selectedPage
+  );
 
   return (
     <div
@@ -114,96 +125,188 @@ const SrRouteScreen = ({ srId }: any) => {
           style={{ height: `${mainComponentHeight}px`, paddingBottom: "200px" }}
         >
           {tableTab == "saturday" &&
-            isFetched &&
-            data?.data?.saturday?.map((route: RouteDetail) => (
-              <RouteBox
-                key={route?._id}
-                title={route?.bnName}
-                distance={6}
-                day="saturday"
-                id={route?._id}
-                uid={srId}
-                refetch={refetch}
-              />
-            ))}
+            (getDayname() == "saturday" &&
+            dayDataFetched &&
+            dayData?.data != null
+              ? dayData?.data?.routes?.map((route: RouteDetail) => (
+                  <RouteBox
+                    key={route?._id}
+                    title={route?.bnName}
+                    distance={6}
+                    day="saturday"
+                    id={route?._id}
+                    uid={srId}
+                    refetch={refetch}
+                  />
+                ))
+              : isFetched &&
+                data?.data?.saturday?.map((route: RouteDetail) => (
+                  <RouteBox
+                    key={route?._id}
+                    title={route?.bnName}
+                    distance={6}
+                    day="saturday"
+                    id={route?._id}
+                    uid={srId}
+                    refetch={refetch}
+                  />
+                )))}
           {tableTab == "sunday" &&
-            isFetched &&
-            data?.data?.sunday?.map((route: RouteDetail) => (
-              <RouteBox
-                key={route?._id}
-                title={route?.bnName}
-                distance={6}
-                day="sunday"
-                id={route?._id}
-                uid={srId}
-                refetch={refetch}
-              />
-            ))}
+            (getDayname() == "sunday" && dayDataFetched && dayData?.data != null
+              ? dayData?.data?.routes?.map((route: RouteDetail) => (
+                  <RouteBox
+                    key={route?._id}
+                    title={route?.bnName}
+                    distance={6}
+                    day="sunday"
+                    id={route?._id}
+                    uid={srId}
+                    refetch={refetch}
+                  />
+                ))
+              : isFetched &&
+                data?.data?.sunday?.map((route: RouteDetail) => (
+                  <RouteBox
+                    key={route?._id}
+                    title={route?.bnName}
+                    distance={6}
+                    day="sunday"
+                    id={route?._id}
+                    uid={srId}
+                    refetch={refetch}
+                  />
+                )))}
           {tableTab == "monday" &&
-            isFetched &&
-            data?.data?.monday?.map((route: RouteDetail) => (
-              <RouteBox
-                key={route?._id}
-                title={route?.bnName}
-                distance={6}
-                day="monday"
-                id={route?._id}
-                uid={srId}
-                refetch={refetch}
-              />
-            ))}
+            (getDayname() == "monday" && dayDataFetched && dayData?.data != null
+              ? dayData?.data?.routes?.map((route: RouteDetail) => (
+                  <RouteBox
+                    key={route?._id}
+                    title={route?.bnName}
+                    distance={6}
+                    day="monday"
+                    id={route?._id}
+                    uid={srId}
+                    refetch={refetch}
+                  />
+                ))
+              : isFetched &&
+                data?.data?.monday?.map((route: RouteDetail) => (
+                  <RouteBox
+                    key={route?._id}
+                    title={route?.bnName}
+                    distance={6}
+                    day="monday"
+                    id={route?._id}
+                    uid={srId}
+                    refetch={refetch}
+                  />
+                )))}
           {tableTab == "tuesday" &&
-            isFetched &&
-            data?.data?.tuesday?.map((route: RouteDetail) => (
-              <RouteBox
-                key={route?._id}
-                title={route?.bnName}
-                distance={6}
-                day="tuesday"
-                id={route?._id}
-                uid={srId}
-                refetch={refetch}
-              />
-            ))}
+            (getDayname() == "tuesday" &&
+            dayDataFetched &&
+            dayData?.data != null
+              ? dayData?.data?.routes?.map((route: RouteDetail) => (
+                  <RouteBox
+                    key={route?._id}
+                    title={route?.bnName}
+                    distance={6}
+                    day="tuesday"
+                    id={route?._id}
+                    uid={srId}
+                    refetch={refetch}
+                  />
+                ))
+              : isFetched &&
+                data?.data?.tuesday?.map((route: RouteDetail) => (
+                  <RouteBox
+                    key={route?._id}
+                    title={route?.bnName}
+                    distance={6}
+                    day="tuesday"
+                    id={route?._id}
+                    uid={srId}
+                    refetch={refetch}
+                  />
+                )))}
           {tableTab == "wednesday" &&
-            isFetched &&
-            data?.data?.wednesday?.map((route: RouteDetail) => (
-              <RouteBox
-                key={route?._id}
-                title={route?.bnName}
-                distance={6}
-                day="wednesday"
-                id={route?._id}
-                uid={srId}
-                refetch={refetch}
-              />
-            ))}
+            (getDayname() == "wednesday" &&
+            dayDataFetched &&
+            dayData?.data != null
+              ? dayData?.data?.routes?.map((route: RouteDetail) => (
+                  <RouteBox
+                    key={route?._id}
+                    title={route?.bnName}
+                    distance={6}
+                    day="wednesday"
+                    id={route?._id}
+                    uid={srId}
+                    refetch={refetch}
+                  />
+                ))
+              : isFetched &&
+                data?.data?.wednesday?.map((route: RouteDetail) => (
+                  <RouteBox
+                    key={route?._id}
+                    title={route?.bnName}
+                    distance={6}
+                    day="wednesday"
+                    id={route?._id}
+                    uid={srId}
+                    refetch={refetch}
+                  />
+                )))}
           {tableTab == "thursday" &&
-            isFetched &&
-            data?.data?.thursday?.map((route: RouteDetail) => (
-              <RouteBox
-                key={route?._id}
-                title={route?.bnName}
-                distance={6}
-                day="thursday"
-                id={route?._id}
-                uid={srId}
-                refetch={refetch}
-              />
-            ))}
+            (getDayname() == "thursday" &&
+            dayDataFetched &&
+            dayData?.data != null
+              ? dayData?.data?.routes?.map((route: RouteDetail) => (
+                  <RouteBox
+                    key={route?._id}
+                    title={route?.bnName}
+                    distance={6}
+                    day="thursday"
+                    id={route?._id}
+                    uid={srId}
+                    refetch={refetch}
+                  />
+                ))
+              : isFetched &&
+                data?.data?.thursday?.map((route: RouteDetail) => (
+                  <RouteBox
+                    key={route?._id}
+                    title={route?.bnName}
+                    distance={6}
+                    day="thursday"
+                    id={route?._id}
+                    uid={srId}
+                    refetch={refetch}
+                  />
+                )))}
           {tableTab == "friday" &&
-            isFetched &&
-            data?.data?.friday?.map((route: RouteDetail) => (
-              <RouteBox
-                key={route?._id}
-                title={route?.bnName}
-                distance={6}
-                day="friday"
-                id={route?._id}
-                uid={srId}
-                refetch={refetch}
-              />
-            ))}
+            (getDayname() == "friday" && dayDataFetched && dayData?.data != null
+              ? dayData?.data?.routes?.map((route: RouteDetail) => (
+                  <RouteBox
+                    key={route?._id}
+                    title={route?.bnName}
+                    distance={6}
+                    day="friday"
+                    id={route?._id}
+                    uid={srId}
+                    refetch={refetch}
+                  />
+                ))
+              : isFetched &&
+                data?.data?.friday?.map((route: RouteDetail) => (
+                  <RouteBox
+                    key={route?._id}
+                    title={route?.bnName}
+                    distance={6}
+                    day="friday"
+                    id={route?._id}
+                    uid={srId}
+                    refetch={refetch}
+                  />
+                )))}
         </div>
       </div>
       {/* footer content */}

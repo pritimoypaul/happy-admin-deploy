@@ -7,3 +7,23 @@ export const buildUrl = (endpoint: string, params: any) => {
   });
   return url.toString();
 };
+
+
+export const buildUrlMultiValue = (endpoint: string, params: Record<string, any>) => {
+  const url = new URL(endpoint, "https://api.happybd.org");
+
+  Object.keys(params).forEach((key) => {
+    const value = params[key];
+    if (Array.isArray(value)) {
+      // If the value is an array, append each item with the same key
+      value.forEach((item) => {
+        url.searchParams.append(key, item);
+      });
+    } else if (value) {
+      // If the value is not an array, append it directly
+      url.searchParams.append(key, value);
+    }
+  });
+
+  return url.toString();
+};

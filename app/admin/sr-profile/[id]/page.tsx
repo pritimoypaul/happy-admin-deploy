@@ -281,7 +281,12 @@ const SrProfile = ({ params }: { params: Promise<{ id: string }> }) => {
       {profileTab === "Order" && <SrOrderScreen srId={data?.data?.sr?._id} />}
       {profileTab === "Dealer" && <SrDealer id={id} />}
       {profileTab === "Company" && <SrCompany id={id} />}
-      {profileTab === "Products" && <SrProducts srId={data?.data?.sr?._id} />}
+      {profileTab === "Products" && (
+        <SrProducts
+          dealerId={data?.data?.dealers}
+          companyId={data?.data?.companies}
+        />
+      )}
       {profileTab === "Route" && <SrRouteScreen srId={id} />}
       {profileTab === "Summary" && (
         <SrSummaryScreen srId={data?.data?.sr?._id} />
