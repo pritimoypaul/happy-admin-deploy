@@ -13,8 +13,8 @@ const SrProducts = ({ dealerId, companyId }: any) => {
   const [limit] = useState(10);
   const [selectedPage] = useState(1);
 
-  const processedDealers = dealerId.map((dealer: dealer) => dealer._id);
-  const processedCompanies = companyId.map((company: Company) => company._id);
+  const processedDealers = dealerId?.map((dealer: dealer) => dealer._id);
+  const processedCompanies = companyId?.map((company: Company) => company._id);
 
   const { data, isFetched } = useProductList({
     limit,
