@@ -238,69 +238,76 @@ const OrderScreen = () => {
                     <TableHead className="text-right w-[200px]"></TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {isFetched &&
-                    data?.data?.result?.map((order: Order) => (
-                      <TableRow key={order?._id} className="text-[#595F84]">
-                        <TableCell className="font-medium">
-                          {order?.id.slice(0, 10)}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {moment(order?.createdAt).format("LL")}
-                        </TableCell>
-                        <TableCell>
-                          <Link href="/admin/order-retailer-profile">
-                            {order?.retailer?.name}
-                          </Link>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          ৳{order?.collectedAmount}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          ৳{order?.collectionAmount}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div
-                            className={clsx(
-                              `text-right w-full flex justify-end float-right`,
-                              {
-                                "text-[#0CAF60] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
-                                  order?.paymentStatus == "Paid",
-                                "text-[#EF3DF2] bg-[#FC6BFF1A] px-[14px] py-[4px] rounded-sm max-w-fit":
-                                  order?.paymentStatus == "Unpaid",
-                              }
-                            )}
-                          >
-                            {order?.paymentStatus == "Paid" ? "Paid" : "Baki"}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div
-                            className={clsx(
-                              `text-right w-full flex justify-end float-right`,
-                              {
-                                "text-[#0CAF60] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
-                                  order?.status == "Delivered",
-                                "text-[#0bb663] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
-                                  order?.status == "Processing",
-                                "text-[#FD6A6A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
-                                  order?.status == "Cancelled",
-                                "text-[#FE964A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
-                                  order?.status == "On Delivery",
-                              }
-                            )}
-                          >
-                            {order?.status}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {/* {product?.cancel_reason && (
+                {tableTab == "on_delivery" ? (
+                  <TableBody>
+                    {isFetched &&
+                      data?.data?.result
+                        ?.filter(
+                          (order: Order) => order?.status == "Dispatched"
+                        )
+                        .map((order: Order) => (
+                          <TableRow key={order?._id} className="text-[#595F84]">
+                            <TableCell className="font-medium">
+                              {order?.id.slice(0, 10)}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {moment(order?.createdAt).format("LL")}
+                            </TableCell>
+                            <TableCell>
+                              <Link href="/admin/order-retailer-profile">
+                                {order?.retailer?.name}
+                              </Link>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              ৳{order?.collectedAmount}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              ৳{order?.collectionAmount}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div
+                                className={clsx(
+                                  `text-right w-full flex justify-end float-right`,
+                                  {
+                                    "text-[#0CAF60] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.paymentStatus == "Paid",
+                                    "text-[#EF3DF2] bg-[#FC6BFF1A] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.paymentStatus == "Unpaid",
+                                  }
+                                )}
+                              >
+                                {order?.paymentStatus == "Paid"
+                                  ? "Paid"
+                                  : "Baki"}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div
+                                className={clsx(
+                                  `text-right w-full flex justify-end float-right`,
+                                  {
+                                    "text-[#0CAF60] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.status == "Delivered",
+                                    "text-[#0bb663] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.status == "Processing",
+                                    "text-[#FD6A6A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.status == "Cancelled",
+                                    "text-[#FE964A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.status == "On Delivery",
+                                  }
+                                )}
+                              >
+                                {order?.status}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {/* {product?.cancel_reason && (
                           <p className="text-[10px] text-[#8A94A6]">
                             {product.cancel_reason}
                           </p>
                         )} */}
 
-                          {/* {product?.delivery_percentage && (
+                              {/* {product?.delivery_percentage && (
                           <div className="flex items-center gap-4">
                             <p className="text-[10px] text-[#0CAF60]">
                               {product?.delivery_percentage}%
@@ -312,10 +319,339 @@ const OrderScreen = () => {
                             />
                           </div>
                         )} */}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                  </TableBody>
+                ) : tableTab == "delivered" ? (
+                  <TableBody>
+                    {isFetched &&
+                      data?.data?.result
+                        ?.filter((order: Order) => order?.status == "Delivered")
+                        .map((order: Order) => (
+                          <TableRow key={order?._id} className="text-[#595F84]">
+                            <TableCell className="font-medium">
+                              {order?.id.slice(0, 10)}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {moment(order?.createdAt).format("LL")}
+                            </TableCell>
+                            <TableCell>
+                              <Link href="/admin/order-retailer-profile">
+                                {order?.retailer?.name}
+                              </Link>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              ৳{order?.collectedAmount}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              ৳{order?.collectionAmount}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div
+                                className={clsx(
+                                  `text-right w-full flex justify-end float-right`,
+                                  {
+                                    "text-[#0CAF60] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.paymentStatus == "Paid",
+                                    "text-[#EF3DF2] bg-[#FC6BFF1A] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.paymentStatus == "Unpaid",
+                                  }
+                                )}
+                              >
+                                {order?.paymentStatus == "Paid"
+                                  ? "Paid"
+                                  : "Baki"}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div
+                                className={clsx(
+                                  `text-right w-full flex justify-end float-right`,
+                                  {
+                                    "text-[#0CAF60] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.status == "Delivered",
+                                    "text-[#0bb663] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.status == "Processing",
+                                    "text-[#FD6A6A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.status == "Cancelled",
+                                    "text-[#FE964A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.status == "On Delivery",
+                                  }
+                                )}
+                              >
+                                {order?.status}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {/* {product?.cancel_reason && (
+                          <p className="text-[10px] text-[#8A94A6]">
+                            {product.cancel_reason}
+                          </p>
+                        )} */}
+
+                              {/* {product?.delivery_percentage && (
+                          <div className="flex items-center gap-4">
+                            <p className="text-[10px] text-[#0CAF60]">
+                              {product?.delivery_percentage}%
+                            </p>
+                            <Progress
+                              value={Number(product?.delivery_percentage)}
+                              indicatorColor="bg-green-600"
+                              className="w-[60%] h-[5px]"
+                            />
+                          </div>
+                        )} */}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                  </TableBody>
+                ) : tableTab == "cancelled" ? (
+                  <TableBody>
+                    {isFetched &&
+                      data?.data?.result
+                        ?.filter((order: Order) => order?.status == "Cancelled")
+                        .map((order: Order) => (
+                          <TableRow key={order?._id} className="text-[#595F84]">
+                            <TableCell className="font-medium">
+                              {order?.id.slice(0, 10)}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {moment(order?.createdAt).format("LL")}
+                            </TableCell>
+                            <TableCell>
+                              <Link href="/admin/order-retailer-profile">
+                                {order?.retailer?.name}
+                              </Link>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              ৳{order?.collectedAmount}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              ৳{order?.collectionAmount}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div
+                                className={clsx(
+                                  `text-right w-full flex justify-end float-right`,
+                                  {
+                                    "text-[#0CAF60] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.paymentStatus == "Paid",
+                                    "text-[#EF3DF2] bg-[#FC6BFF1A] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.paymentStatus == "Unpaid",
+                                  }
+                                )}
+                              >
+                                {order?.paymentStatus == "Paid"
+                                  ? "Paid"
+                                  : "Baki"}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div
+                                className={clsx(
+                                  `text-right w-full flex justify-end float-right`,
+                                  {
+                                    "text-[#0CAF60] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.status == "Delivered",
+                                    "text-[#0bb663] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.status == "Processing",
+                                    "text-[#FD6A6A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.status == "Cancelled",
+                                    "text-[#FE964A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.status == "On Delivery",
+                                  }
+                                )}
+                              >
+                                {order?.status}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {/* {product?.cancel_reason && (
+                          <p className="text-[10px] text-[#8A94A6]">
+                            {product.cancel_reason}
+                          </p>
+                        )} */}
+
+                              {/* {product?.delivery_percentage && (
+                          <div className="flex items-center gap-4">
+                            <p className="text-[10px] text-[#0CAF60]">
+                              {product?.delivery_percentage}%
+                            </p>
+                            <Progress
+                              value={Number(product?.delivery_percentage)}
+                              indicatorColor="bg-green-600"
+                              className="w-[60%] h-[5px]"
+                            />
+                          </div>
+                        )} */}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                  </TableBody>
+                ) : tableTab == "baki" ? (
+                  <TableBody>
+                    {isFetched &&
+                      data?.data?.result
+                        ?.filter((order: Order) => order?.status == "Baki")
+                        .map((order: Order) => (
+                          <TableRow key={order?._id} className="text-[#595F84]">
+                            <TableCell className="font-medium">
+                              {order?.id.slice(0, 10)}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {moment(order?.createdAt).format("LL")}
+                            </TableCell>
+                            <TableCell>
+                              <Link href="/admin/order-retailer-profile">
+                                {order?.retailer?.name}
+                              </Link>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              ৳{order?.collectedAmount}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              ৳{order?.collectionAmount}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div
+                                className={clsx(
+                                  `text-right w-full flex justify-end float-right`,
+                                  {
+                                    "text-[#0CAF60] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.paymentStatus == "Paid",
+                                    "text-[#EF3DF2] bg-[#FC6BFF1A] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.paymentStatus == "Unpaid",
+                                  }
+                                )}
+                              >
+                                {order?.paymentStatus == "Paid"
+                                  ? "Paid"
+                                  : "Baki"}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div
+                                className={clsx(
+                                  `text-right w-full flex justify-end float-right`,
+                                  {
+                                    "text-[#0CAF60] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.status == "Delivered",
+                                    "text-[#0bb663] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.status == "Processing",
+                                    "text-[#FD6A6A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.status == "Cancelled",
+                                    "text-[#FE964A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                      order?.status == "On Delivery",
+                                  }
+                                )}
+                              >
+                                {order?.status}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {/* {product?.cancel_reason && (
+                          <p className="text-[10px] text-[#8A94A6]">
+                            {product.cancel_reason}
+                          </p>
+                        )} */}
+
+                              {/* {product?.delivery_percentage && (
+                          <div className="flex items-center gap-4">
+                            <p className="text-[10px] text-[#0CAF60]">
+                              {product?.delivery_percentage}%
+                            </p>
+                            <Progress
+                              value={Number(product?.delivery_percentage)}
+                              indicatorColor="bg-green-600"
+                              className="w-[60%] h-[5px]"
+                            />
+                          </div>
+                        )} */}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                  </TableBody>
+                ) : (
+                  <TableBody>
+                    {isFetched &&
+                      data?.data?.result?.map((order: Order) => (
+                        <TableRow key={order?._id} className="text-[#595F84]">
+                          <TableCell className="font-medium">
+                            {order?.id.slice(0, 10)}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {moment(order?.createdAt).format("LL")}
+                          </TableCell>
+                          <TableCell>
+                            <Link href="/admin/order-retailer-profile">
+                              {order?.retailer?.name}
+                            </Link>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            ৳{order?.collectedAmount}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            ৳{order?.collectionAmount}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div
+                              className={clsx(
+                                `text-right w-full flex justify-end float-right`,
+                                {
+                                  "text-[#0CAF60] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                    order?.paymentStatus == "Paid",
+                                  "text-[#EF3DF2] bg-[#FC6BFF1A] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                    order?.paymentStatus == "Unpaid",
+                                }
+                              )}
+                            >
+                              {order?.paymentStatus == "Paid" ? "Paid" : "Baki"}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div
+                              className={clsx(
+                                `text-right w-full flex justify-end float-right`,
+                                {
+                                  "text-[#0CAF60] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                    order?.status == "Delivered",
+                                  "text-[#0bb663] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                    order?.status == "Processing",
+                                  "text-[#FD6A6A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                    order?.status == "Cancelled",
+                                  "text-[#FE964A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
+                                    order?.status == "On Delivery",
+                                }
+                              )}
+                            >
+                              {order?.status}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {/* {product?.cancel_reason && (
+                          <p className="text-[10px] text-[#8A94A6]">
+                            {product.cancel_reason}
+                          </p>
+                        )} */}
+
+                            {/* {product?.delivery_percentage && (
+                          <div className="flex items-center gap-4">
+                            <p className="text-[10px] text-[#0CAF60]">
+                              {product?.delivery_percentage}%
+                            </p>
+                            <Progress
+                              value={Number(product?.delivery_percentage)}
+                              indicatorColor="bg-green-600"
+                              className="w-[60%] h-[5px]"
+                            />
+                          </div>
+                        )} */}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                )}
               </Table>
             )}
           </div>
