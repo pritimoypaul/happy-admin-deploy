@@ -50,6 +50,9 @@ import { useOrderList } from "@/utils/apis/getOrder";
 import { Order } from "@/types/order";
 import { useRetailerList } from "@/utils/apis/getRetailer";
 import { useAreaList } from "@/utils/apis/getArea";
+import { useUpazilaList } from "@/utils/apis/getUpazila";
+import { useUnionList } from "@/utils/apis/getUnion";
+import { Upazila } from "@/types/upazila";
 
 const OrderScreen = () => {
   const { height } = useWindowDimensions();
@@ -57,14 +60,31 @@ const OrderScreen = () => {
   const [tableTab, setTableTab] = useState("all_order");
   const [limit, setLimit] = useState(10);
   const [selectedPage, setSelectedPage] = useState<any>(1);
+  const [selectedUpazila, setSelectedUpazila] = useState("");
+  const [selectedUnion, setSelectedUnion] = useState("");
+  const [selectedArea, setSelectedArea] = useState("");
   const [date, setDate] = React.useState<DateRange | undefined>({
     from: new Date(2024, 0, 20),
     to: addDays(new Date(2024, 0, 20), 20),
   });
 
+  const { data: areaData, refetch: areaRefetch } = useAreaList(
+    1000,
+    1,
+    selectedUnion
+  );
+  const { data: upazilaData, isFetched: upazilaFetched } = useUpazilaList();
+
+  const {
+    data: unionData,
+    isFetched: unionFetched,
+    refetch: unionRefetch,
+  } = useUnionList(selectedUpazila);
+
   const { data, isFetching, isFetched, refetch } = useOrderList({
     limit,
     selectedPage,
+    area: selectedArea,
   });
 
   const { data: retailerData } = useRetailerList(limit, selectedPage);
@@ -84,8 +104,16 @@ const OrderScreen = () => {
   };
 
   useEffect(() => {
+    areaRefetch();
+  }, [selectedUnion]);
+
+  useEffect(() => {
+    unionRefetch();
+  }, [selectedUpazila]);
+
+  useEffect(() => {
     refetch();
-  }, [limit, selectedPage]);
+  }, [limit, selectedPage, selectedArea]);
 
   return (
     <div className="h-full">
@@ -165,6 +193,58 @@ const OrderScreen = () => {
             </div>
           </div>
           <div className="flex gap-4 items-center">
+            <div className="flex gap-4 items-center pr-2">
+              <Select
+                defaultValue={selectedUpazila}
+                onValueChange={(value) => setSelectedUpazila(value)}
+              >
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue placeholder="Upazillla" />
+                </SelectTrigger>
+                <SelectContent>
+                  {upazilaFetched &&
+                    upazilaData?.data?.result?.map((upazila: Upazila) => (
+                      <SelectItem key={upazila._id} value={upazila._id}>
+                        {upazila.bnName}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                defaultValue={selectedUnion}
+                onValueChange={(value) => setSelectedUnion(value)}
+              >
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue placeholder="Union" />
+                </SelectTrigger>
+                <SelectContent>
+                  {unionFetched &&
+                    unionData?.data?.result?.map((union: any) => (
+                      <SelectItem key={union._id} value={union._id}>
+                        {union.bnName}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                defaultValue={selectedArea}
+                onValueChange={(value) => setSelectedArea(value)}
+              >
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue placeholder="Bazar" />
+                </SelectTrigger>
+                <SelectContent>
+                  {unionFetched &&
+                    areaData?.data?.result?.map((area: any) => (
+                      <SelectItem key={area._id} value={area._id}>
+                        {area.bnName}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
             <Popover>
               <PopoverTrigger asChild>
                 <Button

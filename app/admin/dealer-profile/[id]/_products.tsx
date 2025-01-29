@@ -1,20 +1,24 @@
 import ProductCard from "@/components/core/productCard";
+import { Company } from "@/types/company";
 import { Product } from "@/types/product";
 import { useProductList } from "@/utils/apis/getProduct";
 import useWindowDimensions from "@/utils/windowSize";
 import Image from "next/image";
 import React, { useState } from "react";
 
-const DealerProducts = ({ dealerId }: any) => {
+const DealerProducts = ({ dealerId, companyId }: any) => {
   const { height } = useWindowDimensions();
   const [viewFormat, setViewFormat] = useState<string>("gridview");
   const [limit] = useState(10);
   const [selectedPage] = useState(1);
 
+  const processedCompanies = companyId?.map((company: Company) => company._id);
+
   const { data, isFetched } = useProductList({
     limit,
     selectedPage,
     dealerId,
+    companyId: processedCompanies,
   });
 
   const mainComponentHeight = height - 300;

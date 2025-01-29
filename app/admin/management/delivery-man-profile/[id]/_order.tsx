@@ -180,12 +180,34 @@ const DeliveryOrderScreen = ({ id }: any) => {
                 <TableHead className="text-right w-[200px]"></TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
-              {isFetched &&
-                data?.data?.result?.map((order: Order) => (
-                  <CollapsibleRow key={order?._id} product={order} />
-                ))}
-            </TableBody>
+
+            {tableTab == "delivered" ? (
+              <TableBody>
+                {isFetched &&
+                  data?.data?.result
+                    ?.filter((order: Order) => order?.status == "Delivered")
+                    .map((order: Order) => (
+                      <CollapsibleRow key={order?._id} product={order} />
+                    ))}
+              </TableBody>
+            ) : tableTab == "cancelled" ? (
+              <TableBody>
+                {isFetched &&
+                  data?.data?.result
+                    ?.filter((order: Order) => order?.status == "Cancelled")
+                    .map((order: Order) => (
+                      <CollapsibleRow key={order?._id} product={order} />
+                    ))}
+              </TableBody>
+            ) : (
+              <TableBody>
+                {isFetched &&
+                  data?.data?.result?.map((order: Order) => (
+                    <CollapsibleRow key={order?._id} product={order} />
+                  ))}
+              </TableBody>
+            )}
+
             <br />
             <br />
             <br />

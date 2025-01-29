@@ -214,7 +214,10 @@ const DealerProfile = ({ params }: { params: Promise<{ id: string }> }) => {
 
       {/* main element */}
       {profileTab === "Products" && (
-        <DealerProducts dealerId={data?.data?.dealer?._id} />
+        <DealerProducts
+          dealerId={data?.data?.dealer?._id}
+          companyId={data?.data?.companies}
+        />
       )}
       {profileTab === "Summary" && (
         <DealerSummaryScreen dealerId={data?.data?.dealer?._id} />

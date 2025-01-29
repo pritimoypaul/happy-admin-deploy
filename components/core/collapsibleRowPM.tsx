@@ -13,7 +13,7 @@ interface CollapsibleRowProps {
   product: any;
 }
 
-const CollapsibleRow = ({ product }: CollapsibleRowProps) => {
+const CollapsibleRowPM = ({ product }: CollapsibleRowProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const { data, refetch } = useOrderDetails(product?.id);
@@ -220,4 +220,4 @@ const CollapsibleRow = ({ product }: CollapsibleRowProps) => {
   );
 };
 
-export default CollapsibleRow;
+export default CollapsibleRowPM;
