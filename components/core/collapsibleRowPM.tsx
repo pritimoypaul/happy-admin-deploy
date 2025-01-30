@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { TableCell, TableRow } from "@/components/ui/table";
 
@@ -8,6 +8,7 @@ import Image from "next/image";
 import { Progress } from "../ui/progress";
 import moment from "moment";
 import { useOrderDetails } from "@/utils/apis/getOrderDetails";
+import axiosInstance from "@/utils/axios";
 
 interface CollapsibleRowProps {
   product: any;
@@ -15,51 +16,74 @@ interface CollapsibleRowProps {
 
 const CollapsibleRowPM = ({ product }: CollapsibleRowProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [orderData, setOrderData] = useState<any>({});
 
   const { data, refetch } = useOrderDetails(product?.id);
+
+  const getOrderDetails = async () => {
+    try {
+      const response = await axiosInstance.get(`/orders/${product?.id}`);
+      setOrderData(response.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    getOrderDetails();
+  }, []);
+
+  console.log(orderData?.data?.products);
+
+  const calculateInventory = () => {
+    let totalInventory = 0;
+    if (orderData?.data?.products) {
+      orderData.data.products.forEach((item: any) => {
+        totalInventory += item?.inventory?.out;
+      });
+    }
+    console.log("total inventory: " + totalInventory);
+    return totalInventory;
+  };
+
+  const checkEdited = () => {
+    if (orderData?.data?.products) {
+      let edited = false;
+      orderData.data.products.forEach((item: any) => {
+        if (item?.isEdited == true) {
+          edited = true;
+        }
+      });
+      return edited;
+    }
+    return false;
+  };
+
   return (
     <>
       <TableRow key={product?._id} className="text-[#595F84]">
-        <TableCell className="font-medium">
+        <TableCell className="font-medium w-[40%]">
           {moment(product?.createdAt).format("LL")}
         </TableCell>
-        <TableCell>{product?.sr?.name}</TableCell>
-        <TableCell className="text-center">{product.qty}</TableCell>
-        <TableCell className="text-right">
-          {product.collectionAmount} ৳
-        </TableCell>
+        <TableCell>{product?.retailer?.name}</TableCell>
+
         <TableCell className="text-right">
           <div
-            className={clsx(`text-right w-full flex justify-end float-right`, {
-              "text-[#0CAF60] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
-                product?.paymentStatus == "paid",
-              "text-[#EF3DF2] bg-[#FC6BFF1A] px-[14px] py-[4px] rounded-sm max-w-fit":
-                product?.paymentStatus == "Unpaid",
-            })}
+            className={clsx(
+              `text-right w-full flex justify-end float-right text-[#0472ED] bg-[#007AFF30] px-[14px] py-[4px] rounded-sm max-w-fit`,
+              {
+                "text-[#FD6A6A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
+                  calculateInventory() <= 0,
+                "text-[#FE964A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
+                  calculateInventory() > 0 && checkEdited() == true,
+              }
+            )}
           >
-            {product?.paymentStatus == "paid" ? "Paid" : "Baki"}
-          </div>
-        </TableCell>
-        <TableCell className="text-right">
-          <div
-            className={clsx(`text-right w-full flex justify-end float-right`, {
-              "text-[#0CAF60] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
-                product.status == "delivered",
-              "text-[#0aa75b] bg-[#E7F7EF] px-[14px] py-[4px] rounded-sm max-w-fit":
-                product.status == "Processing",
-              "text-[#FD6A6A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
-                product.status == "cancelled",
-              "text-[#FE964A] bg-[#FFF0E6] px-[14px] py-[4px] rounded-sm max-w-fit":
-                product.status == "on_delivery",
-            })}
-          >
-            {product.status == "delivered"
-              ? "Delivered"
-              : product.status == "on_delivery"
-              ? "On Delivery"
-              : product.status == "Processing"
-              ? "Processing"
-              : "Cancelled"}
+            {calculateInventory() <= 0
+              ? "Empty"
+              : calculateInventory() > 0 && checkEdited() == true
+              ? "Edited"
+              : "Fulfilled"}
           </div>
         </TableCell>
         <TableCell>
@@ -158,56 +182,56 @@ const CollapsibleRowPM = ({ product }: CollapsibleRowProps) => {
             <Collapsible open={isOpen} onOpenChange={setIsOpen}>
               <CollapsibleContent>
                 <div className="w-full py-[20px] px-[20px]">
-                  <p className="font-bold pb-[16px]">Price</p>
+                  <p className="font-bold pb-[16px]">Edited Order</p>
                   <div className="flex flex-col gap-[16px]">
-                    {data?.data?.products?.map((item: any) => (
-                      <p key={item?._id}>Tk {item?.price} </p>
-                    ))}
+                    {orderData?.data?.products?.map((item: any) =>
+                      item?.inventory?.out == 0 ? (
+                        <p key={item._id}>Empty</p>
+                      ) : item?.product?.isEdited ? (
+                        <p key={item._id}>Edited</p>
+                      ) : (
+                        <p key={item._id}>n/a</p>
+                      )
+                    )}
                   </div>
                 </div>
               </CollapsibleContent>
             </Collapsible>
           </TableCell>
+
           <TableCell>
             <Collapsible open={isOpen} onOpenChange={setIsOpen}>
               <CollapsibleContent>
                 <div className="w-full py-[20px] px-[20px]">
-                  <p className="font-bold pb-[16px]">SR PRICE</p>
+                  <p className="font-bold pb-[16px]">STATUS</p>
                   <div className="flex flex-col gap-[16px]">
-                    {data?.data?.products?.map((item: any) => (
-                      <p key={item?._id}>Tk {item?.srPrice} </p>
-                    ))}
-                  </div>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          </TableCell>
-          <TableCell>
-            <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-              <CollapsibleContent>
-                <div className="w-full py-[20px] px-[20px]">
-                  <p className="font-bold pb-[16px]">O/C</p>
-                  <div className="flex flex-col gap-[16px]">
-                    {data?.data?.products?.map((item: any) => (
-                      <p key={item?._id} className="text-[#1EB564]">
-                        {item?.product?.ourCommission} Tk
-                      </p>
-                    ))}
-                    {/* <p className="text-[#E49F4E]">-10 Tk</p> */}
-                  </div>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          </TableCell>
-          <TableCell>
-            <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-              <CollapsibleContent>
-                <div className="w-full py-[20px] px-[20px]">
-                  <p className="font-bold pb-[16px]">TOTAL</p>
-                  <div className="flex flex-col gap-[16px]">
-                    {data?.data?.products?.map((item: any) => (
-                      <p key={item?._id}>Tk {item?.totalAmount} </p>
-                    ))}
+                    {orderData?.data?.products?.map((item: any) =>
+                      item?.inventory?.out == 0 ? (
+                        <Image
+                          key={item._id}
+                          src="/icons/red_tick.svg"
+                          alt="tick"
+                          height={12}
+                          width={12}
+                        />
+                      ) : item?.product?.isEdited ? (
+                        <Image
+                          key={item._id}
+                          src="/icons/orange_tick.svg"
+                          alt="tick"
+                          height={12}
+                          width={12}
+                        />
+                      ) : (
+                        <Image
+                          key={item._id}
+                          src="/icons/green_tick.svg"
+                          alt="tick"
+                          height={12}
+                          width={12}
+                        />
+                      )
+                    )}
                   </div>
                 </div>
               </CollapsibleContent>

@@ -94,7 +94,7 @@ const ManagementPacking = () => {
               name={packingMan?.name}
               details={packingMan?.phone}
               image={packingMan?.profileImg}
-              url="/admin/management/packing-man-profile"
+              url={`/admin/management/packing-man-profile/${packingMan?._id}`}
             />
           ))}
       </div>

@@ -8,7 +8,8 @@ async function getOrder(
   sr?: string,
   retailer?: string,
   dsr?: string,
-  area?: string
+  area?: string,
+  packingMan?: string
 ) {
   const url = buildUrl("/api/v1/orders", {
     limit: limit,
@@ -17,6 +18,7 @@ async function getOrder(
     retailer: retailer,
     dsr: dsr,
     area: area,
+    packingMan: packingMan,
   });
   try {
     const response = await axiosInstance.get(url);
@@ -33,6 +35,7 @@ export const useOrderList = ({
   retailer,
   dsr,
   area,
+  packingMan,
 }: {
   limit: number;
   selectedPage: number;
@@ -40,9 +43,11 @@ export const useOrderList = ({
   retailer?: string;
   dsr?: string;
   area?: string;
+  packingMan?: string;
 }) => {
   return useQuery({
     queryKey: ["order-list"],
-    queryFn: () => getOrder(limit, selectedPage, sr, retailer, dsr, area),
+    queryFn: () =>
+      getOrder(limit, selectedPage, sr, retailer, dsr, area, packingMan),
   });
 };

@@ -2,7 +2,7 @@
 
 import useWindowDimensions from "@/utils/windowSize";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 
 import {
   Select,
@@ -44,7 +44,7 @@ import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import CollapsibleRowPM from "@/components/core/collapsibleRowPM";
 
-const PackingManProfile = ({ id }: any) => {
+const PackingManProfile = ({ params }: { params: Promise<{ id: string }> }) => {
   const { height } = useWindowDimensions();
   const [limit, setLimit] = useState(10);
   const [tableTab, setTableTab] = useState("all_order");
@@ -54,12 +54,14 @@ const PackingManProfile = ({ id }: any) => {
     to: addDays(new Date(2024, 0, 20), 20),
   });
 
+  const { id } = use(params);
+
   const mainComponentHeight = height - 120;
 
   const { data, isFetched, refetch } = useOrderList({
     limit,
     selectedPage,
-    dsr: id,
+    packingMan: id,
   });
 
   const paginate = (side: string) => {
@@ -154,10 +156,7 @@ const PackingManProfile = ({ id }: any) => {
             <TableHeader>
               <TableRow className="text-[#595F84]">
                 <TableHead className="w-[200px]">Date</TableHead>
-                <TableHead>Sr</TableHead>
-                <TableHead className="text-center">Total Items</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="text-right">Payment</TableHead>
+                <TableHead>Retailer</TableHead>
                 <TableHead className="text-right">Status</TableHead>
                 <TableHead className="text-right w-[200px]"></TableHead>
               </TableRow>
