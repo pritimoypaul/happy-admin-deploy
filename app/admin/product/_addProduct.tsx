@@ -433,8 +433,8 @@ export function AddProductForm({ refetchData }: any) {
                               {dealerFetched &&
                                 dealerData?.data?.result?.map((dealer: any) => (
                                   <SelectItem
-                                    key={dealer?._id}
-                                    value={dealer?._id}
+                                    key={dealer?.dealer?._id}
+                                    value={dealer?.dealer?._id}
                                   >
                                     {dealer?.dealer.name}
                                   </SelectItem>
