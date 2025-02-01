@@ -1,12 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 import {
   Select,
@@ -32,92 +26,42 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import ProfileCardCompact from "@/components/core/profileCardCompact";
+import ProfileTab from "@/components/core/profileTab";
+import { useDealerList } from "@/utils/apis/getDealer";
+import { dealer } from "@/types/dealer";
 
 const CheckoutManProfile = () => {
-  const { height } = useWindowDimensions();
+  const { height, width } = useWindowDimensions();
   const [date, setDate] = React.useState<DateRange | undefined>({
     from: new Date(2024, 0, 20),
     to: addDays(new Date(2024, 0, 20), 20),
   });
 
   const mainComponentHeight = height - 300;
+  const mainComponentWidth = width - 300;
+
+  const { data } = useDealerList(100, 1);
 
   return (
     <div className="h-full">
       {/* top elements */}
-      <div className="w-full bg-[#fff] rounded-[12px] p-[25px] relative border-[1px] border-[#C9E2FF]">
-        <div className="absolute right-[15px]">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Image
-                src="/icons/options.svg"
-                height={16}
-                width={16}
-                alt="options"
-                className="cursor-pointer"
-              />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 absolute right-[0px] top-2">
-              <DropdownMenuLabel></DropdownMenuLabel>
-              <ul className="p-4">
-                <li className="flex items-center gap-2">
-                  <Image
-                    src="/icons/edit-icon.svg"
-                    height={10}
-                    width={10}
-                    alt="edit"
-                  />
-                  <p className="text-[14px] text-[#8A94A6]">Edit Profile</p>
-                </li>
 
-                <li className="mt-[10px] flex items-center gap-2">
-                  <Image
-                    src="/icons/delete-icon.svg"
-                    height={10}
-                    width={10}
-                    alt="delete"
-                  />
-                  <p className="text-[14px] text-[#FF565E]">Block</p>
-                </li>
-              </ul>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <div className="p-[10px] w-2/3 flex gap-[100px] items-center">
-          <div className="flex items-center gap-5">
-            <div className="h-[80px] w-[80px]">
-              <Image
-                src="/images/man-large.png"
-                alt="Profile"
-                width={80}
-                height={80}
-                className="h-[80px] w-[80px] object-cover rounded-full"
-              />
-            </div>
-            <div>
-              <p className="text-[20px] font-medium text-[#222950]">
-                Mohammad Rasel
-              </p>
-              <p className="text-[14px] text-[#8A94A6]">+880125 5566 5566</p>
-            </div>
-          </div>
+      {/* profile tabs */}
 
-          <div className="flex items-center gap-5">
-            <div className="p-[18px] rounded-md bg-[#F8FAFF]">
-              <Image
-                src="/icons/calendar.svg"
-                height={20}
-                width={18}
-                alt="calendar"
+      <div
+        className="flex gap-4 items-center mt-[20px] overflow-x-scroll"
+        style={{ width: `${mainComponentWidth}px` }}
+      >
+        <div className="flex min-w-max h-[100px] gap-4">
+          {data?.data?.result.map((dealer: { _id: string; dealer: dealer }) => (
+            <button key={dealer?._id} onClick={() => {}}>
+              <ProfileTab
+                image={dealer?.dealer?.profileImg}
+                title={dealer?.dealer?.name}
+                selected={false}
               />
-            </div>
-            <div>
-              <p className="font-medium text-[15px] text-[#222950]">
-                Join Date
-              </p>
-              <p className="text-[#8A94A6] text-[14px]">10 march 2023</p>
-            </div>
-          </div>
+            </button>
+          ))}
         </div>
       </div>
 

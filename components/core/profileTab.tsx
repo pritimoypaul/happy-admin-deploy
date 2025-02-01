@@ -19,7 +19,13 @@ const ProfileTab = ({ title, image, selected }: ProfileTabProps) => {
         }
       )}
     >
-      <Image src={image} alt="Overview" height={30} width={30} />
+      <Image
+        className="rounded-sm"
+        src={image}
+        alt="Overview"
+        height={30}
+        width={30}
+      />
       <p className="text-[16px]">{title}</p>
     </div>
   );

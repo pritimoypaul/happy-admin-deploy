@@ -362,6 +362,7 @@ export function EditProductForm({ refetchData, editData }: any) {
                               <SelectItem value="পিস/পিচ">পিস/পিচ</SelectItem>
                               <SelectItem value="কেস">কেস</SelectItem>
                               <SelectItem value="পলি">পলি</SelectItem>
+                              <SelectItem value="জার">জার</SelectItem>
                             </SelectContent>
                           </Select>
                         </FormControl>
