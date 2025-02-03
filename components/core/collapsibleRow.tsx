@@ -132,7 +132,11 @@ const CollapsibleRow = ({ product }: CollapsibleRowProps) => {
                   <div className="flex flex-col gap-[16px]">
                     {data?.data?.products?.map((item: any) => (
                       <div key={item?._id} className="flex gap-4 items-center">
-                        <p>{item?.product?.quantityPerPackage} </p>
+                        <p>
+                          {Math.floor(
+                            item?.quantity / item?.product?.quantityPerPackage
+                          )}{" "}
+                        </p>
 
                         <span>
                           <div className="text-[12px] w-[15px] h-[15px] bg-[#ffffff] rounded-[4px] flex justify-center items-center border-[1px] border-[#8A94A64A]">
@@ -140,7 +144,9 @@ const CollapsibleRow = ({ product }: CollapsibleRowProps) => {
                           </div>
                         </span>
 
-                        <p>{item?.quantity} </p>
+                        <p>
+                          {item?.quantity % item?.product?.quantityPerPackage}{" "}
+                        </p>
 
                         <span>
                           <div className="text-[12px] w-[15px] h-[15px] bg-[#ffffff] rounded-[4px] flex justify-center items-center border-[1px] border-[#8A94A64A]">
