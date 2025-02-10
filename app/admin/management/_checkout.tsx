@@ -1,9 +1,19 @@
+import { AddButton } from "@/components/core/addButton";
 import ProfileCard from "@/components/core/profileCard";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { User } from "@/types/user";
 import { useUserList } from "@/utils/apis/getUser";
 import useWindowDimensions from "@/utils/windowSize";
 import Image from "next/image";
 import React, { useState } from "react";
+import { AddUserForm } from "./_addForm";
 
 const ManagementCheckout = () => {
   const { height } = useWindowDimensions();
@@ -13,7 +23,11 @@ const ManagementCheckout = () => {
 
   const mainComponentHeight = height - 300;
 
-  const { data, isFetched } = useUserList(limit, selectedPage, "checkingMan");
+  const { data, isFetched, refetch } = useUserList(
+    limit,
+    selectedPage,
+    "checkingMan"
+  );
 
   return (
     <div
@@ -71,6 +85,18 @@ const ManagementCheckout = () => {
               />
             </button>
           </div>
+          <Dialog>
+            <DialogTrigger>
+              <AddButton title="Add New" />
+            </DialogTrigger>
+            <DialogContent className="max-w-[450px] max-h-[90%] overflow-scroll">
+              <DialogHeader>
+                <DialogTitle>Add New Checkout Man</DialogTitle>
+                <DialogDescription></DialogDescription>
+              </DialogHeader>
+              <AddUserForm refetch={refetch} />
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
       <div

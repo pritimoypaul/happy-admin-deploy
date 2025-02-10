@@ -6,6 +6,17 @@ import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { AddButton } from "@/components/core/addButton";
+import { AddUserForm } from "./_addForm";
+
 const ManagementDelivery = () => {
   const { height } = useWindowDimensions();
   const [viewFormat, setViewFormat] = useState<string>("gridview");
@@ -14,7 +25,7 @@ const ManagementDelivery = () => {
 
   const mainComponentHeight = height - 300;
 
-  const { data, isFetched, isFetching } = useUserList(
+  const { data, isFetched, isFetching, refetch } = useUserList(
     limit,
     selectedPage,
     "deliveryMan"
@@ -76,6 +87,18 @@ const ManagementDelivery = () => {
               />
             </button>
           </div>
+          <Dialog>
+            <DialogTrigger>
+              <AddButton title="Add New" />
+            </DialogTrigger>
+            <DialogContent className="max-w-[450px] max-h-[90%] overflow-scroll">
+              <DialogHeader>
+                <DialogTitle>Add New Delivery Man</DialogTitle>
+                <DialogDescription></DialogDescription>
+              </DialogHeader>
+              <AddUserForm refetch={refetch} />
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
       {isFetching && (
