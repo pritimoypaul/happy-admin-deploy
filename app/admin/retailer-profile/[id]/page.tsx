@@ -55,6 +55,7 @@ import { useRetailerDetails } from "@/utils/apis/getRetailerDetails";
 import moment from "moment";
 import { useOrderList } from "@/utils/apis/getOrder";
 import { Order } from "@/types/order";
+import { useOrderCount } from "@/utils/apis/getOrderCount";
 
 const RetailerProfileScreen = ({
   params,
@@ -95,6 +96,10 @@ const RetailerProfileScreen = ({
       setSelectedPage(selectedPage + 1);
     }
   };
+
+  const { data: orderCountData } = useOrderCount({
+    retailer: data?.data?.retailer?._id,
+  });
 
   useEffect(() => {
     orderRefetch();
@@ -204,15 +209,21 @@ const RetailerProfileScreen = ({
       <div className="border-b-[1px] border-l-[1px] border-r-[1px]  border-[#C9E2FF] w-full bg-[#fff] rounded-b-[12px] flex justify-between">
         <div className="w-full px-[64px] py-[32px] border-r-[1px] border-[#C9E2FF]">
           <p className="text-[12px] text-[#595F84]">TOTAL ORDER</p>
-          <p className="font-medium text-[16px] text-[#222950]">683</p>
+          <p className="font-medium text-[16px] text-[#222950]">
+            {orderCountData?.data?.totalOrder ?? 0}
+          </p>
         </div>
         <div className="w-full px-[64px] py-[32px] border-r-[1px] border-[#C9E2FF]">
           <p className="text-[12px] text-[#595F84]">CANCELED</p>
-          <p className="font-medium text-[16px] text-[#222950]">400</p>
+          <p className="font-medium text-[16px] text-[#222950]">
+            {orderCountData?.data?.totalCancelled ?? 0}
+          </p>
         </div>
         <div className="w-full px-[64px] py-[32px] border-r-[1px] border-[#C9E2FF]">
           <p className="text-[12px] text-[#595F84]">Delivered</p>
-          <p className="font-medium text-[16px] text-[#222950]">855</p>
+          <p className="font-medium text-[16px] text-[#222950]">
+            {orderCountData?.data?.totalCompleted ?? 0}
+          </p>
         </div>
         <div className="w-full px-[64px] py-[32px]">
           <p className="text-[12px] text-[#595F84]">o/c</p>
