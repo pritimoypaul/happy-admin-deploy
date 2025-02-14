@@ -30,7 +30,7 @@ import {
 
 import useWindowDimensions from "@/utils/windowSize";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 
 import { addDays, format } from "date-fns";
 import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
@@ -51,7 +51,11 @@ import Link from "next/link";
 import clsx from "clsx";
 import { Checkbox } from "@/components/ui/checkbox";
 
-const CheckoutManProfile = () => {
+const PickupDealerProfile = ({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) => {
   const { height, width } = useWindowDimensions();
   const [date, setDate] = React.useState<DateRange | undefined>({
     from: new Date(2024, 0, 20),
@@ -65,11 +69,13 @@ const CheckoutManProfile = () => {
 
   const { data } = useDealerList(100, 1);
 
+  const { id } = use(params);
+
   const {
     data: productData,
     isFetched: productFetched,
     isFetching: productFetching,
-  } = usePickedProductList(limit, selectedPage);
+  } = usePickedProductList(limit, selectedPage, id);
 
   const paginate = (side: string) => {
     if (side === "left") {
@@ -397,4 +403,4 @@ const CheckoutManProfile = () => {
   );
 };
 
-export default CheckoutManProfile;
+export default PickupDealerProfile;

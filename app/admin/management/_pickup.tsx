@@ -117,7 +117,7 @@ const ManagementPickup = () => {
               name={pickupMan?.name}
               details={pickupMan?.phone}
               image={pickupMan?.profileImg}
-              url="/admin/management/pickup-man-profile"
+              url={`/admin/management/pickup-man-profile/${pickupMan?.id}`}
             />
           ))}
       </div>

@@ -18,7 +18,7 @@ import {
 
 import useWindowDimensions from "@/utils/windowSize";
 import Image from "next/image";
-import React from "react";
+import React, { use } from "react";
 
 import { addDays, format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
@@ -32,8 +32,12 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import ProfileCardCompact from "@/components/core/profileCardCompact";
+import { useUserDetails } from "@/utils/apis/getUserDetails";
+import moment from "moment";
+import { useDealerList } from "@/utils/apis/getDealer";
+import { DealerDetails } from "@/types/dealerDetails";
 
-const PickupManProfile = () => {
+const PickupManProfile = ({ params }: { params: Promise<{ id: string }> }) => {
   const { height } = useWindowDimensions();
   const [date, setDate] = React.useState<DateRange | undefined>({
     from: new Date(2024, 0, 20),
@@ -41,6 +45,12 @@ const PickupManProfile = () => {
   });
 
   const mainComponentHeight = height - 300;
+
+  const { id } = use(params);
+
+  const { data: userDetails } = useUserDetails(id);
+
+  const { data: dealerData } = useDealerList(100, 1);
 
   return (
     <div className="h-full">
@@ -87,7 +97,11 @@ const PickupManProfile = () => {
           <div className="flex items-center gap-5">
             <div className="h-[80px] w-[80px]">
               <Image
-                src="/images/man-large.png"
+                src={
+                  userDetails?.data?.profileImg
+                    ? userDetails?.data?.profileImg
+                    : "/images/man-large.png"
+                }
                 alt="Profile"
                 width={80}
                 height={80}
@@ -96,9 +110,11 @@ const PickupManProfile = () => {
             </div>
             <div>
               <p className="text-[20px] font-medium text-[#222950]">
-                Mohammad Rasel
+                {userDetails?.data?.name}
               </p>
-              <p className="text-[14px] text-[#8A94A6]">+880125 5566 5566</p>
+              <p className="text-[14px] text-[#8A94A6]">
+                {userDetails?.data?.phone}
+              </p>
             </div>
           </div>
 
@@ -115,7 +131,9 @@ const PickupManProfile = () => {
               <p className="font-medium text-[15px] text-[#222950]">
                 Join Date
               </p>
-              <p className="text-[#8A94A6] text-[14px]">10 march 2023</p>
+              <p className="text-[#8A94A6] text-[14px]">
+                {moment(userDetails?.data?.createdAt).format("ll")}
+              </p>
             </div>
           </div>
         </div>
@@ -203,51 +221,14 @@ const PickupManProfile = () => {
               paddingBottom: "200px",
             }}
           >
-            <ProfileCardCompact
-              name="রমজান আলী"
-              image="/images/man.png"
-              url="/admin/management/pickup-man-profile/dealer"
-            />
-            <ProfileCardCompact
-              name="রমজান আলী"
-              image="/images/man.png"
-              url="/admin/management/pickup-man-profile/dealer"
-            />
-            <ProfileCardCompact
-              name="রমজান আলী"
-              image="/images/man.png"
-              url="/admin/management/pickup-man-profile/dealer"
-            />
-            <ProfileCardCompact
-              name="রমজান আলী"
-              image="/images/man.png"
-              url="/admin/management/pickup-man-profile/dealer"
-            />
-            <ProfileCardCompact
-              name="রমজান আলী"
-              image="/images/man.png"
-              url="/admin/management/pickup-man-profile/dealer"
-            />
-            <ProfileCardCompact
-              name="রমজান আলী"
-              image="/images/man.png"
-              url="/admin/management/pickup-man-profile/dealer"
-            />
-            <ProfileCardCompact
-              name="রমজান আলী"
-              image="/images/man.png"
-              url="/admin/management/pickup-man-profile/dealer"
-            />
-            <ProfileCardCompact
-              name="রমজান আলী"
-              image="/images/man.png"
-              url="/admin/management/pickup-man-profile/dealer"
-            />
-            <ProfileCardCompact
-              name="রমজান আলী"
-              image="/images/man.png"
-              url="/admin/management/pickup-man-profile/dealer"
-            />
+            {dealerData?.data?.result?.map((dealer: DealerDetails) => (
+              <ProfileCardCompact
+                key={dealer._id}
+                name={dealer?.dealer?.name}
+                image={dealer?.dealer?.profileImg}
+                url={`/admin/management/pickup-man-profile/dealer/${dealer?.dealer?._id}`}
+              />
+            )) || <div className="text-center">No dealer found</div>}
           </div>
         </div>
       </div>
