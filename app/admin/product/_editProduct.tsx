@@ -33,6 +33,7 @@ import { Category } from "@/types/category";
 import { Company } from "@/types/company";
 import axiosInstance from "@/utils/axios";
 import { Loader2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 const FormSchema = z.object({
   image: z.instanceof(File).optional(),
@@ -69,6 +70,7 @@ const FormSchema = z.object({
   h_profit: z.string().min(1, {
     message: "Please H profit.",
   }),
+  status: z.boolean().optional(),
 });
 
 export function EditProductForm({ refetchData, editData }: any) {
@@ -103,6 +105,7 @@ export function EditProductForm({ refetchData, editData }: any) {
       dealer: editData?.dealer?._id,
       company: editData?.company?._id,
       h_profit: editData?.dealerCommission.toString(),
+      status: editData?.status == "Active" ? true : false,
     },
   });
 
@@ -119,7 +122,7 @@ export function EditProductForm({ refetchData, editData }: any) {
       price: Number(data.rate),
       dealerCommission: Number(data.h_profit),
       ourCommission: Number(data.profit_margin),
-      status: "Active",
+      status: data?.status == true ? "Active" : "Disabled",
     };
     // convert json to formData
     const formData = new FormData();
@@ -359,10 +362,11 @@ export function EditProductForm({ refetchData, editData }: any) {
                               <SelectItem value="বক্স">বক্স</SelectItem>
                               <SelectItem value="কার্টুন">কার্টুন</SelectItem>
                               <SelectItem value="ডজন">ডজন</SelectItem>
-                              <SelectItem value="পিস/পিচ">পিস/পিচ</SelectItem>
+                              <SelectItem value="পিচ">পিচ</SelectItem>
                               <SelectItem value="কেস">কেস</SelectItem>
                               <SelectItem value="পলি">পলি</SelectItem>
                               <SelectItem value="জার">জার</SelectItem>
+                              <SelectItem value="কেজি">কেজি</SelectItem>
                             </SelectContent>
                           </Select>
                         </FormControl>
@@ -509,6 +513,26 @@ export function EditProductForm({ refetchData, editData }: any) {
                   />
                 </div>
                 <div></div>
+              </div>
+              <br />
+              <div>
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                      <div className="space-y-0.5">
+                        <FormLabel>Status</FormLabel>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
 

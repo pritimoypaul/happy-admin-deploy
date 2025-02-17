@@ -352,10 +352,11 @@ export function AddProductForm({ refetchData }: any) {
                               <SelectItem value="বক্স">বক্স</SelectItem>
                               <SelectItem value="কার্টুন">কার্টুন</SelectItem>
                               <SelectItem value="ডজন">ডজন</SelectItem>
-                              <SelectItem value="পিস">পিস</SelectItem>
+                              <SelectItem value="পিচ">পিচ</SelectItem>
                               <SelectItem value="কেস">কেস</SelectItem>
                               <SelectItem value="পলি">পলি</SelectItem>
                               <SelectItem value="জার">জার</SelectItem>
+                              <SelectItem value="কেজি">কেজি</SelectItem>
                             </SelectContent>
                           </Select>
                         </FormControl>
