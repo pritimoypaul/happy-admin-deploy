@@ -1,12 +1,10 @@
 import useWindowDimensions from "@/utils/windowSize";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -14,7 +12,6 @@ import {
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -41,11 +38,25 @@ const MainCategoryScreen = () => {
 
   const mainComponentHeight = height - 300;
 
-  const [limit] = useState(10);
-  const [selectedPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [selectedPage, setSelectedPage] = useState<any>(1);
   const [editData, setEditData] = useState({});
 
   const { data, isFetched, refetch } = useCategoryList(limit, selectedPage);
+
+  const paginate = (side: string) => {
+    if (side === "left") {
+      if (selectedPage == 1) return;
+      setSelectedPage(selectedPage - 1);
+    } else {
+      if (selectedPage == data?.data?.meta?.totalPage) return;
+      setSelectedPage(selectedPage + 1);
+    }
+  };
+
+  useEffect(() => {
+    refetch();
+  }, [limit, selectedPage]);
 
   return (
     <div
@@ -105,19 +116,20 @@ const MainCategoryScreen = () => {
       <div className="bg-[#fff] px-[34px] py-[18px] flex justify-between items-center border-t-[1px] border-[#0472ED1F] absolute bottom-0 w-full">
         <div className="text-[#718096] text-[14px] flex gap-2 items-center">
           Show&nbsp;Result:
-          <Select defaultValue={"1"}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="1" />
+          <Select
+            defaultValue={limit.toString()}
+            onValueChange={(value) => setLimit(Number(value))}
+          >
+            <SelectTrigger className="w-full" defaultValue={limit.toString()}>
+              <SelectValue placeholder="10" />
             </SelectTrigger>
             <SelectContent>
-              <SelectGroup>
-                <SelectLabel>1</SelectLabel>
-                <SelectItem value="1">1</SelectItem>
-                <SelectItem value="2">2</SelectItem>
-                <SelectItem value="3">3</SelectItem>
-                <SelectItem value="4">4</SelectItem>
-                <SelectItem value="5">5</SelectItem>
-              </SelectGroup>
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="6">6</SelectItem>
+              <SelectItem value="7">7</SelectItem>
+              <SelectItem value="8">8</SelectItem>
+              <SelectItem value="9">9</SelectItem>
+              <SelectItem value="10">10</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -125,24 +137,56 @@ const MainCategoryScreen = () => {
           <Pagination>
             <PaginationContent>
               <PaginationItem>
-                <PaginationPrevious href="#" />
+                <PaginationPrevious href="#" onClick={() => paginate("left")} />
               </PaginationItem>
+              {isFetched &&
+                (() => {
+                  const totalPages = data?.data?.meta?.totalPage || 0;
+                  const currentPage = data?.data?.meta?.page || 1;
+
+                  // Helper function to determine if a page should be shown
+                  const shouldShowPage = (page: any) => {
+                    return (
+                      page === 1 || // Always show the first page
+                      page === totalPages || // Always show the last page
+                      (page >= currentPage - 1 && page <= currentPage + 1) // Show current page, one before, one after
+                    );
+                  };
+
+                  // Construct the pages array with ellipses
+                  const pages = [];
+                  for (let i = 1; i <= totalPages; i++) {
+                    if (shouldShowPage(i)) {
+                      pages.push(i);
+                    } else if (pages[pages.length - 1] !== "...") {
+                      pages.push("...");
+                    }
+                  }
+
+                  return (
+                    <div className="flex items-center">
+                      {/* Page Numbers */}
+                      {pages.map((page, idx) => (
+                        <PaginationItem key={idx}>
+                          {page === "..." ? (
+                            <span className="ellipsis">...</span>
+                          ) : (
+                            <PaginationLink
+                              className="cursor-pointer"
+                              onClick={() => setSelectedPage(page)}
+                              isActive={currentPage === page}
+                            >
+                              {page}
+                            </PaginationLink>
+                          )}
+                        </PaginationItem>
+                      ))}
+                    </div>
+                  );
+                })()}
+
               <PaginationItem>
-                <PaginationLink href="#">1</PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href="#" isActive>
-                  2
-                </PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href="#">3</PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationEllipsis />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationNext href="#" />
+                <PaginationNext href="#" onClick={() => paginate("right")} />
               </PaginationItem>
             </PaginationContent>
           </Pagination>

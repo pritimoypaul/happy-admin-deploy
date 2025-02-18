@@ -8,6 +8,15 @@ import {
 } from "@/components/ui/select";
 
 import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -18,22 +27,37 @@ import {
 
 import useWindowDimensions from "@/utils/windowSize";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AddProductForm } from "./_addProduct";
 import { EditProductForm } from "./_editProduct";
 import { useProductList } from "@/utils/apis/getProduct";
 import { Product } from "@/types/product";
 
 const MainProducts = () => {
-  const { height } = useWindowDimensions();
+  const { height, width } = useWindowDimensions();
 
   const mainComponentHeight = height - 300;
+  const mainComponentWidth = width - 300;
 
-  const [limit] = useState(10);
-  const [selectedPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [selectedPage, setSelectedPage] = useState<any>(1);
   const [editData, setEditData] = useState({});
 
   const { data, isFetched, refetch } = useProductList({ limit, selectedPage });
+
+  const paginate = (side: string) => {
+    if (side === "left") {
+      if (selectedPage == 1) return;
+      setSelectedPage(selectedPage - 1);
+    } else {
+      if (selectedPage == data?.data?.meta?.totalPage) return;
+      setSelectedPage(selectedPage + 1);
+    }
+  };
+
+  useEffect(() => {
+    refetch();
+  }, [limit, selectedPage]);
 
   return (
     <div
@@ -116,6 +140,89 @@ const MainProducts = () => {
           <EditProductForm refetchData={refetch} editData={editData} />
         </DialogContent>
       </Dialog>
+      {/* footer content */}
+      <div
+        className="bg-[#fff] px-[34px] py-[18px] flex justify-between items-center border-t-[1px] border-[#0472ED1F] absolute bottom-0"
+        style={{ width: `${mainComponentWidth}px` }}
+      >
+        <div className="text-[#718096] text-[14px] flex gap-2 items-center">
+          Show&nbsp;Result:
+          <Select
+            defaultValue={limit.toString()}
+            onValueChange={(value) => setLimit(Number(value))}
+          >
+            <SelectTrigger className="w-full" defaultValue={limit.toString()}>
+              <SelectValue placeholder="10" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="6">6</SelectItem>
+              <SelectItem value="7">7</SelectItem>
+              <SelectItem value="8">8</SelectItem>
+              <SelectItem value="9">9</SelectItem>
+              <SelectItem value="10">10</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious href="#" onClick={() => paginate("left")} />
+              </PaginationItem>
+              {isFetched &&
+                (() => {
+                  const totalPages = data?.data?.meta?.totalPage || 0;
+                  const currentPage = data?.data?.meta?.page || 1;
+
+                  // Helper function to determine if a page should be shown
+                  const shouldShowPage = (page: any) => {
+                    return (
+                      page === 1 || // Always show the first page
+                      page === totalPages || // Always show the last page
+                      (page >= currentPage - 1 && page <= currentPage + 1) // Show current page, one before, one after
+                    );
+                  };
+
+                  // Construct the pages array with ellipses
+                  const pages = [];
+                  for (let i = 1; i <= totalPages; i++) {
+                    if (shouldShowPage(i)) {
+                      pages.push(i);
+                    } else if (pages[pages.length - 1] !== "...") {
+                      pages.push("...");
+                    }
+                  }
+
+                  return (
+                    <div className="flex items-center">
+                      {/* Page Numbers */}
+                      {pages.map((page, idx) => (
+                        <PaginationItem key={idx}>
+                          {page === "..." ? (
+                            <span className="ellipsis">...</span>
+                          ) : (
+                            <PaginationLink
+                              className="cursor-pointer"
+                              onClick={() => setSelectedPage(page)}
+                              isActive={currentPage === page}
+                            >
+                              {page}
+                            </PaginationLink>
+                          )}
+                        </PaginationItem>
+                      ))}
+                    </div>
+                  );
+                })()}
+
+              <PaginationItem>
+                <PaginationNext href="#" onClick={() => paginate("right")} />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      </div>
     </div>
   );
 };
